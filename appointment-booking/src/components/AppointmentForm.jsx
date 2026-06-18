@@ -1,36 +1,60 @@
 import { useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase";
-function AppointmentForm({ addAppointment }) {
+import "./AppointmentForm.css";
+
+function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     date: "",
     time: "",
+    doctor: selectedDoctor?.name || "",
+    doctorId: selectedDoctor?.id || "",
   });
-const handleSubmit = async (e) => {
-  e.preventDefault();
 
-  try {
-    const docRef = await addDoc(collection(db, "appointments"), formData);
-    addAppointment({ id: docRef.id, ...formData });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    alert("Appointment Booked Successfully");
+    try {
+      const docRef = await addDoc(collection(db, "appointments"), formData);
+      addAppointment({ id: docRef.id, ...formData });
 
-    setFormData({
-      name: "",
-      email: "",
-      date: "",
-      time: "",
-    });
-  } catch (error) {
-    console.log(error);
-    alert("Error booking appointment");
-  }
-};
+      alert("Appointment Booked Successfully");
+
+      setFormData({
+        name: "",
+        email: "",
+        date: "",
+        time: "",
+        doctor: selectedDoctor?.name || "",
+        doctorId: selectedDoctor?.id || "",
+      });
+      onBack();
+    } catch (error) {
+      console.log(error);
+      alert("Error booking appointment");
+    }
+  };
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
+    <div className="appointment-form-container">
+      <button className="back-btn" onClick={onBack}>
+        ← Back to Doctors
+      </button>
+      
+      <div className="form-header">
+        <h2>Book Appointment</h2>
+        <div className="doctor-selection">
+          <span className="doctor-avatar">{selectedDoctor?.avatar}</span>
+          <div>
+            <p className="doctor-name">{selectedDoctor?.name}</p>
+            <p className="doctor-specialty">{selectedDoctor?.specialty}</p>
+          </div>
+        </div>
+      </div>
+
+      <form className="form" onSubmit={handleSubmit}>
       <input
         type="text"
         placeholder="Enter Name"
@@ -61,8 +85,9 @@ const handleSubmit = async (e) => {
         <option value="10:00 AM">10:00 AM</option>
         <option value="11:00 AM">11:00 AM</option>
       </select>
-      <button type="submit">Book Appointment</button>
+      <button type="submit" className="submit-btn">Book Appointment</button>
     </form>
+    </div>
   );
 }
 

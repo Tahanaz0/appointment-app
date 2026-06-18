@@ -3,12 +3,23 @@ import "./App.css";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
-import AppointmentForm from "./components/AppointmentForm";
-import AppointmentList from "./components/AppointmentList";
+import SplashScreen from "./components/SplashScreen";
+import HomePage from "./components/HomePage";
 
 function App() {
   const [appointments, setAppointments] = useState([]);
+  const [showSplash, setShowSplash] = useState(true);
 
+  // Handle splash screen timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    },2000); // Show splash screen for 3 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Fetch appointments from Firebase
   useEffect(() => {
     const q = query(collection(db, "appointments"));
     const unsubscribe = onSnapshot(
@@ -34,13 +45,13 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <h1>Appointment Booking</h1>
-
-      <AppointmentForm addAppointment={addAppointment} />
-
-      <AppointmentList appointments={appointments} />
-    </div>
+    <>
+      {showSplash ? (
+        <SplashScreen />
+      ) : (
+        <HomePage appointments={appointments} addAppointment={addAppointment} />
+      )}
+    </>
   );
 }
 
