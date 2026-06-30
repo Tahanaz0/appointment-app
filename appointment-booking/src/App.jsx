@@ -8,6 +8,7 @@ import SignupPage from "./components/SignupPage";
 import SplashScreen from "./components/SplashScreen";
 import LoginPage from "./components/LoginPage";
 import HomePage from "./components/HomePage";
+import ServicePage from "./pages/ServicePage";
 
 function App() {
   const [appointments, setAppointments] = useState([]);
@@ -93,11 +94,23 @@ function App() {
             )
           }
         />
+        <Route
+  path="/service/:name"
+  element={
+    user ? (
+      <ServicePage />
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
 
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
     </Router>
+    
   );
 }
 

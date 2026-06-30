@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
+import { Link } from "react-router-dom";
 import AppointmentForm from "./AppointmentForm";
 import "./HomePage.css";
 
@@ -74,10 +75,38 @@ function HomePage({ appointments, addAppointment }) {
   ];
 
   const services = [
-    { name: "Haircut", emoji: "✂️" },
-    { name: "Beard", emoji: "🧔" },
-    { name: "Hair Color", emoji: "🎨" },
-    { name: "Facial", emoji: "💆" },
+    {
+      id: "haircut",
+      name: "Haircut",
+      emoji: "✂️",
+      price: "$20",
+      duration: "30 min",
+      description: "Professional haircut with modern styling.",
+    },
+    {
+      id: "beard",
+      name: "Beard",
+      emoji: "🧔",
+      price: "$10",
+      duration: "20 min",
+      description: "Premium beard trimming and shaping.",
+    },
+    {
+      id: "hair-color",
+      name: "Hair Color",
+      emoji: "🎨",
+      price: "$60",
+      duration: "1 Hour",
+      description: "Hair coloring with premium products.",
+    },
+    {
+      id: "facial",
+      name: "Facial",
+      emoji: "💆",
+      price: "$40",
+      duration: "45 min",
+      description: "Relaxing facial treatment for glowing skin.",
+    },
   ];
 
   const reviews = [
@@ -154,11 +183,15 @@ function HomePage({ appointments, addAppointment }) {
         <div className="services-section">
           <h3 className="section-title">What are you looking for?</h3>
           <div className="services-grid">
-            {services.map((service, idx) => (
-              <div key={idx} className="service-card">
+            {services.map((service) => (
+              <Link
+                key={service.id}
+                to={`/service/${service.id}`}
+                className="service-card"
+              >
                 <div className="service-emoji">{service.emoji}</div>
                 <p>{service.name}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -167,7 +200,9 @@ function HomePage({ appointments, addAppointment }) {
         <div className="specialists-section">
           <div className="section-header">
             <h3 className="section-title">Your Favorite Specialists</h3>
-            <a href="#" className="view-all">View All</a>
+            <a href="#" className="view-all">
+              View All
+            </a>
           </div>
 
           <div className="specialists-list">
@@ -185,7 +220,7 @@ function HomePage({ appointments, addAppointment }) {
                     )}
                   </p>
                 </div>
-                <button 
+                <button
                   className="book-specialist-btn"
                   onClick={() => handleSelectBarber(barber)}
                 >
@@ -200,7 +235,9 @@ function HomePage({ appointments, addAppointment }) {
         <div className="gallery-section">
           <div className="section-header">
             <h3 className="section-title">Gallery</h3>
-            <a href="#" className="view-all">View All</a>
+            <a href="#" className="view-all">
+              View All
+            </a>
           </div>
           <div className="gallery-grid">
             {galleryImages.map((img, idx) => (
@@ -215,7 +252,9 @@ function HomePage({ appointments, addAppointment }) {
         <div className="reviews-section">
           <div className="section-header">
             <h3 className="section-title">Customer Reviews</h3>
-            <a href="#" className="view-all">View All</a>
+            <a href="#" className="view-all">
+              View All
+            </a>
           </div>
 
           <div className="reviews-list">
