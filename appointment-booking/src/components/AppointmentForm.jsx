@@ -40,11 +40,11 @@ function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
   return (
     <div className="appointment-form-container">
       <button className="back-btn" onClick={onBack}>
-        ← Back to Doctors
+        ← Back to Stylists
       </button>
       
       <div className="form-header">
-        <h2>Book Appointment</h2>
+        <h2>Book Your Session</h2>
         <div className="doctor-selection">
           <span className="doctor-avatar">{selectedDoctor?.avatar}</span>
           <div>
@@ -57,14 +57,14 @@ function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
       <form className="form" onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Enter Name"
+        placeholder="Your Name"
         value={formData.name}
         required
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
       />
       <input
         type="email"
-        placeholder="Enter Email"
+        placeholder="Your Email"
         value={formData.email}
         required
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -80,12 +80,16 @@ function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
         required
         onChange={(e) => setFormData({ ...formData, time: e.target.value })}
       >
-        <option value="">Select Time</option>
+        <option value="">Select Time Slot</option>
         <option value="09:00 AM">09:00 AM</option>
         <option value="10:00 AM">10:00 AM</option>
         <option value="11:00 AM">11:00 AM</option>
+        <option value="02:00 PM">02:00 PM</option>
+        <option value="03:00 PM">03:00 PM</option>
+        <option value="04:00 PM">04:00 PM</option>
+        <option value="05:00 PM">05:00 PM</option>
       </select>
-      <button type="submit" className="submit-btn">Book Appointment</button>
+      <button type="submit" className="submit-btn">Confirm Booking</button>
     </form>
     </div>
   );

@@ -1,0 +1,86 @@
+.signup-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1318 0%, #151a1f 45%, #1b2127 100%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+.signup-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../assets/image/spa.jfif") center right / cover no-repeat;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.signup-container {
+  background: rgba(20, 26, 32, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 50px 40px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  z-index: 10;
+  position: relative;
+}
+.signup-title {
+  font-size: 32px;
+  color: #d4af37;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.signup-subtitle {
+  text-align: center;
+  color: #ccc;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.input-field {
+  padding: 14px 18px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+.input-field:focus {
+  outline: none;
+  border-color: #d4af37;
+}
+.error-message {
+  color: #ff6b6b;
+  text-align: center;
+  font-size: 13px;
+}
+.signup-btn {
+  padding: 14px;
+  background: #d4af37;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.signup-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+.signup-btn:disabled {
+  opacity: 0.6;
+}
+.login-text {
+  text-align: center;
+  margin-top: 20px;
+  color: #ccc;
+}
+.login-text a {
+  color: #d4af37;
+  text-decoration: none;
+}

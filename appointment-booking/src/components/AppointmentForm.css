@@ -1,13 +1,14 @@
 .appointment-form-container {
   max-width: 500px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 60px 20px;
+  min-height: 100vh;
 }
 
 .back-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: #d4af37;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -17,7 +18,8 @@
 }
 
 .back-btn:hover {
-  color: #764ba2;
+  color: #f7f7f7;
+  transform: translateX(-5px);
 }
 
 .form-header {
@@ -27,7 +29,7 @@
 
 .form-header h2 {
   font-size: 28px;
-  color: #333;
+  color: #d4af37;
   margin: 0 0 20px 0;
 }
 
@@ -36,10 +38,11 @@
   align-items: center;
   justify-content: center;
   gap: 15px;
-  background: #f8f9ff;
+  background: rgba(20, 26, 32, 0.7);
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .doctor-avatar {
@@ -49,13 +52,13 @@
 .doctor-name {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #f7f7f7;
   margin: 0;
 }
 
 .doctor-specialty {
   font-size: 14px;
-  color: #667eea;
+  color: #d4af37;
   margin: 5px 0 0 0;
 }
 
@@ -68,22 +71,32 @@
 .form input,
 .form select {
   padding: 12px;
-  border: 2px solid #e0e0e0;
+  border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 8px;
   font-size: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f7f7f7;
   transition: border-color 0.3s ease;
+  font-family: inherit;
+}
+
+.form input::placeholder,
+.form select::placeholder {
+  color: #999;
 }
 
 .form input:focus,
 .form select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #d4af37;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
 }
 
 .submit-btn {
   padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #d4af37;
+  color: #121212;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -94,8 +107,12 @@
 }
 
 .submit-btn:hover {
-  transform: scale(1.02);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(-1px);
 }
 
 .submit-btn:active {

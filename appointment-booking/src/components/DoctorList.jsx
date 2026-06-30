@@ -4,8 +4,8 @@ function DoctorList({ doctors, onSelectDoctor }) {
   return (
     <div className="doctor-list-container">
       <div className="doctor-list-header">
-        <h1>Select a Doctor</h1>
-        <p>Choose a doctor to book an appointment</p>
+        <h1>Our Stylists</h1>
+        <p>Choose your favorite barber for premium grooming</p>
       </div>
 
       <div className="doctor-cards">
@@ -18,12 +18,12 @@ function DoctorList({ doctors, onSelectDoctor }) {
               <span className="rating">⭐ {doctor.rating}</span>
               <span className="experience">{doctor.experience} yrs</span>
             </div>
-            <p className="fee">Fee: ₹{doctor.fee}</p>
+            <p className="fee">₹{doctor.fee}</p>
             <button 
               className="book-btn"
               onClick={() => onSelectDoctor(doctor)}
             >
-              Book Appointment
+              Book Now
             </button>
           </div>
         ))}
