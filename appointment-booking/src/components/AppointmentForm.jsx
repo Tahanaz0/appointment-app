@@ -3,14 +3,26 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import "./AppointmentForm.css";
 
-function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
+function AppointmentForm({
+  addAppointment,
+  selectedDoctor,
+  selectedBarber,
+  initialService = "",
+  onBack,
+}) {
+  const selectedSpecialist = selectedDoctor || selectedBarber;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
+    barber: selectedSpecialist?.name || "",
+    service: initialService,
     date: "",
     time: "",
-    doctor: selectedDoctor?.name || "",
-    doctorId: selectedDoctor?.id || "",
+    notes: "",
+    doctor: selectedSpecialist?.name || "",
+    doctorId: selectedSpecialist?.id || "",
   });
 
   const handleSubmit = async (e) => {
@@ -18,18 +30,27 @@ function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
 
     try {
       const docRef = await addDoc(collection(db, "appointments"), formData);
-      addAppointment({ id: docRef.id, ...formData });
 
-      alert("Appointment Booked Successfully");
+      addAppointment({
+        id: docRef.id,
+        ...formData,
+      });
+
+      alert("Appointment Booked Successfully ✅");
 
       setFormData({
         name: "",
         email: "",
+        phone: "",
+        barber: selectedSpecialist?.name || "",
+        service: initialService,
         date: "",
         time: "",
-        doctor: selectedDoctor?.name || "",
-        doctorId: selectedDoctor?.id || "",
+        notes: "",
+        doctor: selectedSpecialist?.name || "",
+        doctorId: selectedSpecialist?.id || "",
       });
+
       onBack();
     } catch (error) {
       console.log(error);
@@ -40,57 +61,139 @@ function AppointmentForm({ addAppointment, selectedDoctor, onBack }) {
   return (
     <div className="appointment-form-container">
       <button className="back-btn" onClick={onBack}>
-        ← Back to Stylists
+        ← Back
       </button>
-      
+
       <div className="form-header">
-        <h2>Book Your Session</h2>
+        <h2>Book Your Appointment</h2>
+{/* 
         <div className="doctor-selection">
           <span className="doctor-avatar">{selectedDoctor?.avatar}</span>
+
           <div>
             <p className="doctor-name">{selectedDoctor?.name}</p>
-            <p className="doctor-specialty">{selectedDoctor?.specialty}</p>
+            <p className="doctor-specialty">
+              {selectedDoctor?.specialty}
+            </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <form className="form" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Your Name"
-        value={formData.name}
-        required
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-      />
-      <input
-        type="email"
-        placeholder="Your Email"
-        value={formData.email}
-        required
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-      />
-      <input
-        type="date"
-        value={formData.date}
-        required
-        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-      />
-      <select
-        value={formData.time}
-        required
-        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-      >
-        <option value="">Select Time Slot</option>
-        <option value="09:00 AM">09:00 AM</option>
-        <option value="10:00 AM">10:00 AM</option>
-        <option value="11:00 AM">11:00 AM</option>
-        <option value="02:00 PM">02:00 PM</option>
-        <option value="03:00 PM">03:00 PM</option>
-        <option value="04:00 PM">04:00 PM</option>
-        <option value="05:00 PM">05:00 PM</option>
-      </select>
-      <button type="submit" className="submit-btn">Confirm Booking</button>
-    </form>
+        {/* Name */}
+        <input
+          type="text"
+          placeholder="Your Name"
+          required
+          value={formData.name}
+          onChange={(e) =>
+            setFormData({ ...formData, name: e.target.value })
+          }
+        />
+
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Your Email"
+          required
+          value={formData.email}
+          onChange={(e) =>
+            setFormData({ ...formData, email: e.target.value })
+          }
+        />
+
+        {/* Phone */}
+        <input
+          type="tel"
+          placeholder="Phone Number"
+          required
+          value={formData.phone}
+          onChange={(e) =>
+            setFormData({ ...formData, phone: e.target.value })
+          }
+        />
+
+        {/* Barber */}
+        {/* Barber */}
+        <select
+          required
+          value={formData.barber}
+          onChange={(e) =>
+            setFormData({ ...formData, barber: e.target.value })
+          }
+        >
+          <option value="">Select Barber</option>
+          {selectedSpecialist?.name && (
+            <option value={selectedSpecialist.name}>
+              {selectedSpecialist.name}
+            </option>
+          )}
+          <option value="Alex">Alex</option>
+          <option value="John">John</option>
+          <option value="Michael">Michael</option>
+          <option value="David">David</option>
+        </select>
+
+        {/* Service */}
+        <select
+          required
+          value={formData.service}
+          onChange={(e) =>
+            setFormData({ ...formData, service: e.target.value })
+          }
+        >
+          <option value="">Select Service</option>
+          <option value="Haircut">✂️ Haircut</option>
+          <option value="Beard Trim">🧔 Beard Trim</option>
+          <option value="Hair Color">🎨 Hair Color</option>
+          <option value="Facial">💆 Facial</option>
+        </select>
+
+        {/* Date */}
+        <input
+          type="date"
+          required
+          value={formData.date}
+          onChange={(e) =>
+            setFormData({ ...formData, date: e.target.value })
+          }
+        />
+
+        {/* Time */}
+        <select
+          required
+          value={formData.time}
+          onChange={(e) =>
+            setFormData({ ...formData, time: e.target.value })
+          }
+        >
+          <option value="">Select Time Slot</option>
+          <option value="09:00 AM">09:00 AM</option>
+          <option value="10:00 AM">10:00 AM</option>
+          <option value="11:00 AM">11:00 AM</option>
+          <option value="12:00 PM">12:00 PM</option>
+          <option value="01:00 PM">01:00 PM</option>
+          <option value="02:00 PM">02:00 PM</option>
+          <option value="03:00 PM">03:00 PM</option>
+          <option value="04:00 PM">04:00 PM</option>
+          <option value="05:00 PM">05:00 PM</option>
+          <option value="06:00 PM">06:00 PM</option>
+        </select>
+
+        {/* Notes */}
+        <textarea
+          placeholder="Special Instructions (Optional)"
+          rows="4"
+          value={formData.notes}
+          onChange={(e) =>
+            setFormData({ ...formData, notes: e.target.value })
+          }
+        />
+
+        <button type="submit" className="submit-btn">
+          Confirm Booking
+        </button>
+      </form>
     </div>
   );
 }

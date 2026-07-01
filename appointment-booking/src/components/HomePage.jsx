@@ -1,78 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { Link } from "react-router-dom";
 import AppointmentForm from "./AppointmentForm";
 import "./HomePage.css";
+import barbers from "./data/barbers";
 
-function HomePage({ appointments, addAppointment }) {
+function HomePage({ addAppointment }) {
   const [selectedBarber, setSelectedBarber] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // 💈 Barber Shop Data
-  const barbers = [
-    {
-      id: 1,
-      name: "Amir Khan",
-      specialty: "Senior Barber",
-      avatar: "💈",
-      rating: 4.9,
-      experience: 15,
-      fee: 500,
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Rajveer Singh",
-      specialty: "Hair Stylist",
-      avatar: "✂️",
-      rating: 4.8,
-      experience: 12,
-      fee: 450,
-      available: false,
-    },
-    {
-      id: 3,
-      name: "Vikram Patel",
-      specialty: "Beard Specialist",
-      avatar: "🧔",
-      rating: 4.9,
-      experience: 10,
-      fee: 400,
-      available: true,
-    },
-    {
-      id: 4,
-      name: "Hassan Ali",
-      specialty: "Master Barber",
-      avatar: "💈",
-      rating: 4.7,
-      experience: 18,
-      fee: 600,
-      available: true,
-    },
-    {
-      id: 5,
-      name: "Arjun Kumar",
-      specialty: "Hair & Beard Care",
-      avatar: "💇",
-      rating: 4.8,
-      experience: 8,
-      fee: 350,
-      available: false,
-    },
-    {
-      id: 6,
-      name: "Sameer Malik",
-      specialty: "Grooming Expert",
-      avatar: "🧴",
-      rating: 4.9,
-      experience: 11,
-      fee: 550,
-      available: true,
-    },
-  ];
+ 
+  
 
   const services = [
     {
@@ -163,6 +104,36 @@ function HomePage({ appointments, addAppointment }) {
           <h1 className="brand-title">💈 GentleCuts</h1>
           <p className="header-time">Available 9:00 AM - 9:00 PM</p>
         </div>
+
+        <div className="bottom-nav">
+          <button
+            className={`nav-btn ${location.pathname === "/" ? "active" : ""}`}
+            onClick={() => navigate("/")}
+          >
+            🏠 Home
+          </button>
+
+          <button
+            className={`nav-btn ${location.pathname === "/book" ? "active" : ""}`}
+            onClick={() => navigate("/book")}
+          >
+            🔍 Book
+          </button>
+
+          <button
+            className={`nav-btn ${location.pathname === "/chat" ? "active" : ""}`}
+            onClick={() => navigate("/chat")}
+          >
+            💬 Chat
+          </button>
+
+          <button
+            className={`nav-btn ${location.pathname === "/profile" ? "active" : ""}`}
+            onClick={() => navigate("/profile")}
+          >
+            👤 Profile
+          </button>
+        </div>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
@@ -207,7 +178,18 @@ function HomePage({ appointments, addAppointment }) {
 
           <div className="specialists-list">
             {barbers.slice(0, 3).map((barber) => (
-              <div key={barber.id} className="specialist-card">
+              <div
+                key={barber.id}
+                className="specialist-card"
+                onClick={() => navigate(`/specialist/${barber.id}`)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    navigate(`/specialist/${barber.id}`);
+                  }
+                }}
+                role="button"
+                tabIndex="0"
+              >
                 <div className="specialist-avatar">{barber.avatar}</div>
                 <div className="specialist-info">
                   <h4>{barber.name}</h4>
@@ -222,7 +204,10 @@ function HomePage({ appointments, addAppointment }) {
                 </div>
                 <button
                   className="book-specialist-btn"
-                  onClick={() => handleSelectBarber(barber)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleSelectBarber(barber);
+                  }}
                 >
                   Book
                 </button>
@@ -279,13 +264,7 @@ function HomePage({ appointments, addAppointment }) {
         <div style={{ height: "80px" }}></div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="bottom-nav">
-        <button className="nav-btn active">🏠 Home</button>
-        <button className="nav-btn">🔍 Book</button>
-        <button className="nav-btn">💬 Chat</button>
-        <button className="nav-btn">👤 Profile</button>
-      </div>
+
     </div>
   );
 }

@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AppointmentForm from "../components/AppointmentForm";
 import "./ServicePage.css";
+
 
 import banner from "../assets/image/banner2.jpg";
 import fade from "../assets/image/haircut1.jpg";
@@ -13,7 +16,7 @@ import beard3 from "../assets/image/beard3.jpg";
 import beard4 from "../assets/image/beard4.jpg";
 import colorBanner from "../assets/image/color-banner.jpg";
 import color1 from "../assets/image/color1.jpg";
-import color2 from "../assets/image/color2.jpg";    
+import color2 from "../assets/image/color2.jpg";
 import color3 from "../assets/image/color3.jpg";
 import color4 from "../assets/image/color4.jpg";
 import facialBanner from "../assets/image/facial-banner.avif";
@@ -22,9 +25,10 @@ import facial2 from "../assets/image/facial2.avif";
 import facial3 from "../assets/image/facial3.jpg";
 import facial4 from "../assets/image/facial4.jpg";
 
-function ServicePage() {
+function ServicePage({ addAppointment }) {
   const { name } = useParams();
   const navigate = useNavigate();
+  const [showBookingForm, setShowBookingForm] = useState(false);
 
   const services = {
     haircut: {
@@ -109,6 +113,23 @@ function ServicePage() {
     );
   }
 
+  if (showBookingForm) {
+    return (
+      <div className="service-page">
+        <AppointmentForm
+          addAppointment={addAppointment}
+          selectedDoctor={{
+            id: name,
+            name: service.title,
+            specialty: service.description,
+          }}
+          initialService={service.title}
+          onBack={() => setShowBookingForm(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="service-page">
       <button className="back-btn" onClick={() => navigate(-1)}>
@@ -162,8 +183,12 @@ function ServicePage() {
         <p>✔ Blow Dry</p>
       </div>
 
-      <button className="book-btn">Book Appointment</button>
-    </div>
+      <button
+        className="book-btn"
+        onClick={() => setShowBookingForm(true)}
+      >
+        Book Appointment
+      </button>    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, query, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "./firebase";
 import SignupPage from "./components/SignupPage";
@@ -9,6 +9,10 @@ import SplashScreen from "./components/SplashScreen";
 import LoginPage from "./components/LoginPage";
 import HomePage from "./components/HomePage";
 import ServicePage from "./pages/ServicePage";
+import BookPage from "./pages/BookPage";
+import ChatPage from "./pages/ChatPage";
+import ProfilePage from "./pages/ProfilePage";
+import SpecialistPage from "./pages/SpecialistPage";
 
 function App() {
   const [appointments, setAppointments] = useState([]);
@@ -51,6 +55,10 @@ function App() {
     setAppointments([...appointments, newAppointment]);
   };
 
+  const deleteAppointment = async (appointmentId) => {
+    await deleteDoc(doc(db, "appointments", appointmentId));
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -64,7 +72,7 @@ function App() {
           element={
             !visitedApp && !user ? (
               <SplashScreen onGetStarted={() => {
-                // setVisitedApp(true);
+                setVisitedApp(true);
               }} />
             ) : user ? (
               <Navigate to="/home" replace />
@@ -80,7 +88,7 @@ function App() {
           element={user ? <Navigate to="/home" replace /> : <LoginPage />}
         />
 
-<Route path="/signup" element={<SignupPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         {/* Home Page - Protected */}
         <Route
           path="/home"
@@ -94,23 +102,49 @@ function App() {
             )
           }
         />
+        <Route path="/" element={<HomePage />} />
         <Route
-  path="/service/:name"
-  element={
-    user ? (
-      <ServicePage />
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
+          path="/book"
+          element={
+            user ? (
+              <BookPage
+                appointments={appointments}
+                deleteAppointment={deleteAppointment}
+              />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/specialist/:id"
+          element={
+            user ? (
+              <SpecialistPage addAppointment={addAppointment} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/service/:name"
+          element={
+            user ? (
+              <ServicePage addAppointment={addAppointment} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
     </Router>
-    
+
   );
 }
 
