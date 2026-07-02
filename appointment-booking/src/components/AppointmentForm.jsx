@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, doc, runTransaction, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import "./AppointmentForm.css";
+
+const createSlotId = (date, time) =>
+  `${date}_${time}`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
 
 function AppointmentForm({
   addAppointment,
@@ -30,16 +33,39 @@ function AppointmentForm({
     e.preventDefault();
 
     try {
+      const bookingSlotId = createSlotId(formData.date, formData.time);
+      const appointmentRef = doc(collection(db, "appointments"));
+      const slotRef = doc(db, "bookingSlots", bookingSlotId);
       const appointmentData = {
         ...formData,
+        bookingSlotId,
+        status: "booked",
         userId: currentUser?.uid || "",
         userEmail: currentUser?.email || formData.email,
+        createdAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, "appointments"), appointmentData);
+      await runTransaction(db, async (transaction) => {
+        const slotSnap = await transaction.get(slotRef);
+
+        if (slotSnap.exists()) {
+          throw new Error("slot-already-booked");
+        }
+
+        transaction.set(slotRef, {
+          appointmentId: appointmentRef.id,
+          date: formData.date,
+          time: formData.time,
+          userId: currentUser?.uid || "",
+          userEmail: currentUser?.email || formData.email,
+          createdAt: serverTimestamp(),
+        });
+
+        transaction.set(appointmentRef, appointmentData);
+      });
 
       addAppointment({
-        id: docRef.id,
+        id: appointmentRef.id,
         ...appointmentData,
       });
 
@@ -61,7 +87,11 @@ function AppointmentForm({
       onBack();
     } catch (error) {
       console.log(error);
-      alert("Error booking appointment");
+      if (error.message === "slot-already-booked") {
+        alert("Ye time slot already booked hai. Please koi aur time select karein.");
+      } else {
+        alert("Error booking appointment");
+      }
     }
   };
 
