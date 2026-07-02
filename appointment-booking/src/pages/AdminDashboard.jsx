@@ -1,12 +1,14 @@
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 import "./AdminDashboard.css";
 
-function AdminDashboard({ appointments = [], deleteAppointment }) {
+function AdminDashboard({ appointments = [], deleteAppointment, barbers = [] }) {
   const navigate = useNavigate();
   const today = new Date().toISOString().slice(0, 10);
   const todayBookings = appointments.filter((item) => item.date === today).length;
+  const availableBarbers = barbers.filter((barber) => barber.available).length;
   const customers = new Set(
     appointments.map((item) => item.userEmail || item.email).filter(Boolean)
   ).size;
@@ -32,6 +34,23 @@ function AdminDashboard({ appointments = [], deleteAppointment }) {
     } catch (error) {
       console.error(error);
       alert("Booking delete nahi ho saki");
+    }
+  };
+
+  const handleAvailabilityChange = async (barber, available) => {
+    try {
+      await setDoc(
+        doc(db, "barbers", String(barber.id)),
+        {
+          available,
+          name: barber.name,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Barber availability update nahi ho saki");
     }
   };
 
@@ -62,6 +81,57 @@ function AdminDashboard({ appointments = [], deleteAppointment }) {
             <span>Customers</span>
             <strong>{customers}</strong>
           </article>
+          <article>
+            <span>Available Barbers</span>
+            <strong>
+              {availableBarbers}/{barbers.length}
+            </strong>
+          </article>
+        </section>
+
+        <section className="admin-panel">
+          <div className="admin-section-header">
+            <div>
+              <span className="admin-eyebrow">Barbers</span>
+              <h2>Availability Control</h2>
+            </div>
+            <span className="admin-count">{availableBarbers} Available</span>
+          </div>
+
+          <div className="admin-barbers">
+            {barbers.map((barber) => (
+              <article className="admin-barber-card" key={barber.id}>
+                <div className="admin-barber-profile">
+                  <div className="admin-avatar">{barber.avatar}</div>
+                  <div>
+                    <h3>{barber.name}</h3>
+                    <p>{barber.specialty}</p>
+                  </div>
+                </div>
+
+                <span
+                  className={
+                    barber.available
+                      ? "admin-barber-status available"
+                      : "admin-barber-status unavailable"
+                  }
+                >
+                  {barber.available ? "Available" : "Unavailable"}
+                </span>
+
+                <label className="admin-switch">
+                  <input
+                    type="checkbox"
+                    checked={barber.available}
+                    onChange={(event) =>
+                      handleAvailabilityChange(barber, event.target.checked)
+                    }
+                  />
+                  <span></span>
+                </label>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="admin-panel">

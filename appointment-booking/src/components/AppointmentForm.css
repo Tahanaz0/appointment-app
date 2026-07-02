@@ -33,6 +33,38 @@
   margin: 0 0 20px 0;
 }
 
+.selected-barber-status {
+  align-items: center;
+  background: rgba(20, 26, 32, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px 14px;
+}
+
+.selected-barber-status strong {
+  color: #f7f7f7;
+}
+
+.selected-barber-status span {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 9px;
+}
+
+.selected-barber-status .is-available {
+  background: rgba(74, 222, 128, 0.12);
+  color: #86efac;
+}
+
+.selected-barber-status .is-unavailable {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
 .doctor-selection {
   display: flex;
   align-items: center;
@@ -141,6 +173,17 @@
 .submit-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+.submit-btn:disabled {
+  background: rgba(148, 163, 184, 0.35);
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.submit-btn:disabled:hover {
+  box-shadow: none;
+  transform: none;
 }
 
 .submit-btn:active {

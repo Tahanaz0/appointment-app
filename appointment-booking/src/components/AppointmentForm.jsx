@@ -10,11 +10,17 @@ function AppointmentForm({
   addAppointment,
   selectedDoctor,
   selectedBarber,
+  barbers = [],
   initialService = "",
   onBack,
 }) {
   const selectedSpecialist = selectedDoctor || selectedBarber;
   const currentUser = auth.currentUser;
+  const barberOptions = barbers.length
+    ? barbers
+    : selectedSpecialist?.name
+      ? [selectedSpecialist]
+      : [];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,16 +34,35 @@ function AppointmentForm({
     doctor: selectedSpecialist?.name || "",
     doctorId: selectedSpecialist?.id || "",
   });
+  const selectedBarberRecord = barbers.find(
+    (barber) => barber.name === formData.barber
+  );
+  const selectedSpecialistAvailable =
+    selectedBarberRecord?.available ?? (selectedSpecialist?.available !== false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      const chosenBarber = barbers.find((barber) => barber.name === formData.barber);
+
+      if (chosenBarber && !chosenBarber.available) {
+        alert("Ye barber abhi unavailable hai. Please koi available barber select karein.");
+        return;
+      }
+
+      if (selectedSpecialist && !selectedSpecialistAvailable) {
+        alert("Ye barber abhi unavailable hai. Please koi available barber select karein.");
+        return;
+      }
+
       const bookingSlotId = createSlotId(formData.date, formData.time);
       const appointmentRef = doc(collection(db, "appointments"));
       const slotRef = doc(db, "bookingSlots", bookingSlotId);
       const appointmentData = {
         ...formData,
+        doctor: formData.barber,
+        doctorId: selectedSpecialist?.id || chosenBarber?.id || "",
         bookingSlotId,
         status: "booked",
         userId: currentUser?.uid || "",
@@ -103,6 +128,16 @@ function AppointmentForm({
 
       <div className="form-header">
         <h2>Book Your Appointment</h2>
+        {selectedSpecialist?.name && (
+          <div className="selected-barber-status">
+            <strong>{selectedSpecialist.name}</strong>
+            <span
+              className={selectedSpecialistAvailable ? "is-available" : "is-unavailable"}
+            >
+              {selectedSpecialistAvailable ? "Available" : "Unavailable"}
+            </span>
+          </div>
+        )}
 {/* 
         <div className="doctor-selection">
           <span className="doctor-avatar">{selectedDoctor?.avatar}</span>
@@ -155,20 +190,28 @@ function AppointmentForm({
         <select
           required
           value={formData.barber}
-          onChange={(e) =>
-            setFormData({ ...formData, barber: e.target.value })
-          }
+          onChange={(e) => {
+            const barber = barbers.find((item) => item.name === e.target.value);
+
+            setFormData({
+              ...formData,
+              barber: e.target.value,
+              doctor: e.target.value,
+              doctorId: barber?.id || "",
+            });
+          }}
         >
           <option value="">Select Barber</option>
-          {selectedSpecialist?.name && (
-            <option value={selectedSpecialist.name}>
-              {selectedSpecialist.name}
+          {barberOptions.map((barber) => (
+            <option
+              key={barber.id || barber.name}
+              value={barber.name}
+              disabled={barber.available === false}
+            >
+              {barber.name}
+              {barber.available === false ? " - Unavailable" : ""}
             </option>
-          )}
-          <option value="Alex">Alex</option>
-          <option value="John">John</option>
-          <option value="Michael">Michael</option>
-          <option value="David">David</option>
+          ))}
         </select>
 
         {/* Service */}
@@ -227,7 +270,14 @@ function AppointmentForm({
           }
         />
 
-        <button type="submit" className="submit-btn">
+        <button
+          type="submit"
+          className="submit-btn"
+          disabled={
+            !selectedSpecialistAvailable ||
+            selectedBarberRecord?.available === false
+          }
+        >
           Confirm Booking
         </button>
       </form>

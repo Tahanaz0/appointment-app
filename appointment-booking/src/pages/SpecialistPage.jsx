@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppointmentForm from "../components/AppointmentForm";
-import barbers from "../components/data/barbers";
+import defaultBarbers from "../components/data/barbers";
 import "./SpecialistPage.css";
 
-function SpecialistPage({ addAppointment }) {
+function SpecialistPage({ addAppointment, barbers = defaultBarbers }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -28,6 +28,7 @@ function SpecialistPage({ addAppointment }) {
         <AppointmentForm
           addAppointment={addAppointment}
           selectedDoctor={specialist}
+          barbers={barbers}
           onBack={() => setShowBookingForm(false)}
         />
       </div>

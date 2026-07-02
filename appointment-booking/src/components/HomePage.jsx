@@ -5,7 +5,7 @@ import { auth } from "../firebase";
 import { Link } from "react-router-dom";
 import AppointmentForm from "./AppointmentForm";
 import "./HomePage.css";
-import barbers from "./data/barbers";
+import defaultBarbers from "./data/barbers";
 import haircutImage from "../assets/image/haircut1.jpg";
 import beardImage from "../assets/image/beard1.jpg";
 import colorImage from "../assets/image/color1.jpg";
@@ -13,8 +13,9 @@ import facialImage from "../assets/image/facial1.jpg";
 import spaImage from "../assets/image/spa.jfif";
 import salonImage from "../assets/image/saloon.png";
 
-function HomePage({ addAppointment }) {
+function HomePage({ addAppointment, barbers = defaultBarbers }) {
   const [selectedBarber, setSelectedBarber] = useState(null);
+  const [showAllBarbers, setShowAllBarbers] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllGallery, setShowAllGallery] = useState(false);
   const navigate = useNavigate();
@@ -139,8 +140,13 @@ function HomePage({ addAppointment }) {
   const visibleGalleryItems = showAllGallery
     ? galleryItems
     : galleryItems.slice(0, 3);
+  const visibleBarbers = showAllBarbers ? barbers : barbers.slice(0, 3);
 
   const handleSelectBarber = (barber) => {
+    if (!barber.available) {
+      return;
+    }
+
     setSelectedBarber(barber);
   };
 
@@ -162,6 +168,7 @@ function HomePage({ addAppointment }) {
       <AppointmentForm
         selectedBarber={selectedBarber}
         addAppointment={addAppointment}
+        barbers={barbers}
         onBack={handleBack}
       />
     );
@@ -244,13 +251,17 @@ function HomePage({ addAppointment }) {
         <div className="specialists-section">
           <div className="section-header">
             <h3 className="section-title">Your Favorite Specialists</h3>
-            <a href="#" className="view-all">
-              View All
-            </a>
+            <button
+              type="button"
+              className="view-all"
+              onClick={() => setShowAllBarbers((prev) => !prev)}
+            >
+              {showAllBarbers ? "Show Less" : "View All"}
+            </button>
           </div>
 
           <div className="specialists-list">
-            {barbers.slice(0, 3).map((barber) => (
+            {visibleBarbers.map((barber) => (
               <div
                 key={barber.id}
                 className="specialist-card"
@@ -277,6 +288,7 @@ function HomePage({ addAppointment }) {
                 </div>
                 <button
                   className="book-specialist-btn"
+                  disabled={!barber.available}
                   onClick={(event) => {
                     event.stopPropagation();
                     handleSelectBarber(barber);

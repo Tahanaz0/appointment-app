@@ -15,6 +15,7 @@ import BookPage from "./pages/BookPage";
 import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
 import SpecialistPage from "./pages/SpecialistPage";
+import defaultBarbers from "./components/data/barbers";
 
 const createSlotId = (date, time) =>
   `${date}_${time}`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
@@ -25,6 +26,15 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [visitedApp, setVisitedApp] = useState(false);
+  const [barberAvailability, setBarberAvailability] = useState({});
+
+  const barbers = defaultBarbers.map((barber) => ({
+    ...barber,
+    available:
+      barberAvailability[barber.id] === undefined
+        ? barber.available
+        : barberAvailability[barber.id],
+  }));
 
   // Check authentication state
   useEffect(() => {
@@ -33,6 +43,7 @@ function App() {
 
       if (!currentUser) {
         setUserRole(null);
+        setAppointments([]);
         setLoading(false);
         return;
       }
@@ -55,7 +66,6 @@ function App() {
   // Fetch appointments for admin or the logged-in user
   useEffect(() => {
     if (!user || !userRole) {
-      setAppointments([]);
       return;
     }
 
@@ -82,6 +92,30 @@ function App() {
 
     return () => unsubscribe();
   }, [user, userRole]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "barbers"),
+      (snapshot) => {
+        const availability = {};
+
+        snapshot.forEach((barberDoc) => {
+          const data = barberDoc.data();
+
+          if (typeof data.available === "boolean") {
+            availability[barberDoc.id] = data.available;
+          }
+        });
+
+        setBarberAvailability(availability);
+      },
+      (error) => {
+        console.error("Error fetching barbers:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const addAppointment = (newAppointment) => {
     setAppointments([...appointments, newAppointment]);
@@ -159,7 +193,11 @@ function App() {
           element={
             user && userRole !== "admin" ? (
               <div className="home-slide-in">
-                <HomePage appointments={appointments} addAppointment={addAppointment} />
+                <HomePage
+                  appointments={appointments}
+                  addAppointment={addAppointment}
+                  barbers={barbers}
+                />
               </div>
             ) : user ? (
               <Navigate to="/admin/dashboard" replace />
@@ -175,6 +213,7 @@ function App() {
               <BookPage
                 appointments={appointments}
                 deleteAppointment={deleteAppointment}
+                barbers={barbers}
               />
             ) : user ? (
               <Navigate to="/admin/dashboard" replace />
@@ -214,6 +253,7 @@ function App() {
               <AdminDashboard
                 appointments={appointments}
                 deleteAppointment={deleteAppointment}
+                barbers={barbers}
               />
             ) : user ? (
               <Navigate to="/home" replace />
@@ -226,7 +266,7 @@ function App() {
           path="/specialist/:id"
           element={
             user && userRole !== "admin" ? (
-              <SpecialistPage addAppointment={addAppointment} />
+              <SpecialistPage addAppointment={addAppointment} barbers={barbers} />
             ) : user ? (
               <Navigate to="/admin/dashboard" replace />
             ) : (
@@ -238,7 +278,7 @@ function App() {
           path="/service/:name"
           element={
             user && userRole !== "admin" ? (
-              <ServicePage addAppointment={addAppointment} />
+              <ServicePage addAppointment={addAppointment} barbers={barbers} />
             ) : user ? (
               <Navigate to="/admin/dashboard" replace />
             ) : (

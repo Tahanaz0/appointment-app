@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AppointmentForm from "../components/AppointmentForm";
 import "./ServicePage.css";
@@ -23,7 +23,7 @@ import facial2 from "../assets/image/facial2.avif";
 import facial3 from "../assets/image/facial3.jpg";
 import facial4 from "../assets/image/facial4.jpg";
 
-function ServicePage({ addAppointment }) {
+function ServicePage({ addAppointment, barbers = [] }) {
   const { name } = useParams();
   const navigate = useNavigate();
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -116,17 +116,18 @@ function ServicePage({ addAppointment }) {
 
   const service = services[name];
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [reviews, setReviews] = useState([]);
+  const defaultReviews = service?.reviews || [];
+  const [reviewState, setReviewState] = useState({
+    serviceName: name,
+    items: defaultReviews,
+  });
+  const reviews =
+    reviewState.serviceName === name ? reviewState.items : defaultReviews;
   const [reviewForm, setReviewForm] = useState({
     name: "",
     comment: "",
     rating: "5",
   });
-
-  useEffect(() => {
-    setReviews(service?.reviews || []);
-    setShowAllReviews(false);
-  }, [service?.title]);
 
   const handleReviewSubmit = (e) => {
     e.preventDefault();
@@ -139,7 +140,10 @@ function ServicePage({ addAppointment }) {
       comment: reviewForm.comment.trim(),
     };
 
-    setReviews((prev) => [newReview, ...prev]);
+    setReviewState((prev) => ({
+      serviceName: name,
+      items: [newReview, ...(prev.serviceName === name ? prev.items : defaultReviews)],
+    }));
     setReviewForm({ name: "", comment: "", rating: "5" });
   };
 
@@ -159,12 +163,8 @@ function ServicePage({ addAppointment }) {
       <div className="service-page">
         <AppointmentForm
           addAppointment={addAppointment}
-          selectedDoctor={{
-            id: name,
-            name: service.title,
-            specialty: service.description,
-          }}
           initialService={service.title}
+          barbers={barbers}
           onBack={() => setShowBookingForm(false)}
         />
       </div>

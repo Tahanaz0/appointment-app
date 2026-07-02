@@ -209,6 +209,7 @@
   border-radius: 10px;
   border: 1px solid rgba(212, 175, 55, 0.2);
   transition: all 0.3s ease;
+  min-width: 0;
 }
 
 .specialist-card:hover {
@@ -224,18 +225,23 @@
 
 .specialist-info {
   flex: 1;
+  min-width: 0;
 }
 
 .specialist-info h4 {
   margin: 0;
   color: #f7f7f7;
   font-size: 14px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .specialist-info .specialty {
   margin: 3px 0 0 0;
   color: #d4af37;
   font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .availability {
@@ -261,11 +267,24 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 0 0 auto;
+  min-width: 64px;
 }
 
 .book-specialist-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.book-specialist-btn:disabled {
+  background: rgba(148, 163, 184, 0.35);
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.book-specialist-btn:disabled:hover {
+  box-shadow: none;
+  transform: none;
 }
 
 /* Gallery */
