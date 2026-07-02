@@ -6,9 +6,17 @@ import { Link } from "react-router-dom";
 import AppointmentForm from "./AppointmentForm";
 import "./HomePage.css";
 import barbers from "./data/barbers";
+import haircutImage from "../assets/image/haircut1.jpg";
+import beardImage from "../assets/image/beard1.jpg";
+import colorImage from "../assets/image/color1.jpg";
+import facialImage from "../assets/image/facial1.jpg";
+import spaImage from "../assets/image/spa.jfif";
+import salonImage from "../assets/image/saloon.png";
 
 function HomePage({ addAppointment }) {
   const [selectedBarber, setSelectedBarber] = useState(null);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showAllGallery, setShowAllGallery] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -65,9 +73,72 @@ function HomePage({ addAppointment }) {
       rating: 4,
       text: "The place was very calm and I love the service. Outstandingly good. Would definitely recommend to friends and family.",
     },
+    {
+      id: 3,
+      name: "Ayesha Khan",
+      time: "2 weeks ago",
+      rating: 5,
+      text: "My appointment started on time and the haircut was exactly what I asked for. Very professional team.",
+    },
+    {
+      id: 4,
+      name: "Ali Raza",
+      time: "3 weeks ago",
+      rating: 5,
+      text: "Clean shop, friendly barber, and a really smooth booking experience. I will book again.",
+    },
+    {
+      id: 5,
+      name: "Sarah Ahmed",
+      time: "1 month ago",
+      rating: 4,
+      text: "Loved the facial service. The staff explained everything clearly and made the visit comfortable.",
+    },
   ];
 
-  const galleryImages = ["🖼️", "🖼️", "🖼️"];
+
+  const galleryItems = [
+    {
+      id: 1,
+      src: haircutImage,
+      title: "Modern Haircut",
+      category: "Haircut",
+    },
+    {
+      id: 2,
+      src: beardImage,
+      title: "Beard Styling",
+      category: "Beard",
+    },
+    {
+      id: 3,
+      src: colorImage,
+      title: "Hair Color",
+      category: "Color",
+    },
+    {
+      id: 4,
+      src: facialImage,
+      title: "Facial Care",
+      category: "Facial",
+    },
+    {
+      id: 5,
+      src: spaImage,
+      title: "Relaxing Spa",
+      category: "Spa",
+    },
+    {
+      id: 6,
+      src: salonImage,
+      title: "Salon Interior",
+      category: "Studio",
+    },
+  ];
+
+  const visibleGalleryItems = showAllGallery
+    ? galleryItems
+    : galleryItems.slice(0, 3);
 
   const handleSelectBarber = (barber) => {
     setSelectedBarber(barber);
@@ -220,15 +291,23 @@ function HomePage({ addAppointment }) {
         <div className="gallery-section">
           <div className="section-header">
             <h3 className="section-title">Gallery</h3>
-            <a href="#" className="view-all">
-              View All
-            </a>
+            <button
+              type="button"
+              className="view-all"
+              onClick={() => setShowAllGallery((prev) => !prev)}
+            >
+              {showAllGallery ? "Show Less" : "View All"}
+            </button>
           </div>
           <div className="gallery-grid">
-            {galleryImages.map((img, idx) => (
-              <div key={idx} className="gallery-item">
-                {img}
-              </div>
+            {visibleGalleryItems.map((item) => (
+              <article key={item.id} className="gallery-item">
+                <img src={item.src} alt={item.title} />
+                <div className="gallery-caption">
+                  <span>{item.category}</span>
+                  <strong>{item.title}</strong>
+                </div>
+              </article>
             ))}
           </div>
         </div>
@@ -237,13 +316,17 @@ function HomePage({ addAppointment }) {
         <div className="reviews-section">
           <div className="section-header">
             <h3 className="section-title">Customer Reviews</h3>
-            <a href="#" className="view-all">
-              View All
-            </a>
+            <button
+              type="button"
+              className="view-all"
+              onClick={() => setShowAllReviews((prev) => !prev)}
+            >
+              {showAllReviews ? "Show Less" : "View All"}
+            </button>
           </div>
 
           <div className="reviews-list">
-            {reviews.map((review) => (
+            {(showAllReviews ? reviews : reviews.slice(0, 2)).map((review) => (
               <div key={review.id} className="review-card">
                 <div className="review-header">
                   <div className="reviewer-info">

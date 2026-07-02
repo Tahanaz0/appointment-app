@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-import { collection, deleteDoc, doc, query, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, query, onSnapshot, where } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "./firebase";
 import SignupPage from "./components/SignupPage";
@@ -30,9 +30,17 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch appointments from Firebase
+  // Fetch appointments for the logged-in user
   useEffect(() => {
-    const q = query(collection(db, "appointments"));
+    if (!user) {
+      setAppointments([]);
+      return;
+    }
+
+    const q = query(
+      collection(db, "appointments"),
+      where("userId", "==", user.uid)
+    );
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -49,7 +57,7 @@ function App() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const addAppointment = (newAppointment) => {
     setAppointments([...appointments, newAppointment]);
@@ -117,7 +125,16 @@ function App() {
           }
         />
         <Route path="/chat" element={<ChatPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/profile"
+          element={
+            user ? (
+              <ProfilePage user={user} appointments={appointments} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
         <Route
           path="/specialist/:id"
           element={

@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AppointmentForm from "../components/AppointmentForm";
 import "./ServicePage.css";
-
-
 import banner from "../assets/image/banner2.jpg";
 import fade from "../assets/image/haircut1.jpg";
 import crew from "../assets/image/haircut2.jpg";
@@ -37,7 +35,11 @@ function ServicePage({ addAppointment }) {
       price: "$20",
       duration: "30 min",
       description: "Professional haircut by experienced barbers.",
-
+      includes: ["Hair Wash", "Hair Cutting", "Hair Styling", "Blow Dry"],
+      reviews: [
+        { name: "Ayesha", rating: 5, comment: "Amazing haircut and friendly service." },
+        { name: "Nadia", rating: 5, comment: "Loved the fade and quick styling." },
+      ],
       banner: banner,
 
       styles: [
@@ -54,7 +56,11 @@ function ServicePage({ addAppointment }) {
       price: "$10",
       duration: "20 min",
       description: "Premium beard trimming and shaping.",
-
+      includes: ["Beard Wash", "Beard Trimming", "Beard Styling", "Hot Towel"],
+      reviews: [
+        { name: "Ali", rating: 5, comment: "Great beard cleanup and very professional." },
+        { name: "Hamza", rating: 4, comment: "Neat trim and relaxing experience." },
+      ],
       banner: beardBanner,
 
       styles: [
@@ -71,7 +77,11 @@ function ServicePage({ addAppointment }) {
       price: "$60",
       duration: "1 Hour",
       description: "Hair coloring with premium products.",
-
+      includes: ["Hair Consultation", "Color Application", "Gloss Treatment", "Aftercare Advice"],
+      reviews: [
+        { name: "Sara", rating: 5, comment: "The color came out exactly how I wanted." },
+        { name: "Mina", rating: 5, comment: "Excellent service and premium products." },
+      ],
       banner: colorBanner,
 
       styles: [
@@ -88,7 +98,11 @@ function ServicePage({ addAppointment }) {
       price: "$40",
       duration: "45 min",
       description: "Relaxing facial treatment.",
-
+      includes: ["Deep Cleansing", "Steam Treatment", "Face Massage", "Moisturizing"],
+      reviews: [
+        { name: "Rida", rating: 5, comment: "Very calming facial and great skincare advice." },
+        { name: "Zara", rating: 4, comment: "Soft skin and a peaceful atmosphere." },
+      ],
       banner: facialBanner,
 
       styles: [
@@ -101,11 +115,38 @@ function ServicePage({ addAppointment }) {
   };
 
   const service = services[name];
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewForm, setReviewForm] = useState({
+    name: "",
+    comment: "",
+    rating: "5",
+  });
+
+  useEffect(() => {
+    setReviews(service?.reviews || []);
+    setShowAllReviews(false);
+  }, [service?.title]);
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+
+    if (!reviewForm.name.trim() || !reviewForm.comment.trim()) return;
+
+    const newReview = {
+      name: reviewForm.name.trim(),
+      rating: Number(reviewForm.rating),
+      comment: reviewForm.comment.trim(),
+    };
+
+    setReviews((prev) => [newReview, ...prev]);
+    setReviewForm({ name: "", comment: "", rating: "5" });
+  };
 
   if (!service) {
     return (
       <div className="service-page">
-        <button className="back-btn" onClick={() => navigate(-1)}>
+        <button type="button" className="back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
         <p>Service not found.</p>
@@ -132,7 +173,7 @@ function ServicePage({ addAppointment }) {
 
   return (
     <div className="service-page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
+      <button type="button" className="back-btn" onClick={() => navigate(-1)}>
         ← Back
       </button>
 
@@ -177,18 +218,77 @@ function ServicePage({ addAppointment }) {
       <div className="include-card">
         <h2>What's Included?</h2>
 
-        <p>✔ Hair Wash</p>
-        <p>✔ Hair Cutting</p>
-        <p>✔ Hair Styling</p>
-        <p>✔ Blow Dry</p>
+        {service.includes.map((item, index) => (
+          <p key={index}>✔ {item}</p>
+        ))}
+      </div>
+
+      <div className="review-card">
+        <div className="review-header">
+          <h2>Customer Reviews</h2>
+          <button
+            type="button"
+            className="view-all-btn"
+            onClick={() => setShowAllReviews((prev) => !prev)}
+          >
+            {showAllReviews ? "Show Less" : "View All"}
+          </button>
+        </div>
+
+        <form className="review-form" onSubmit={handleReviewSubmit}>
+          <input
+            type="text"
+            placeholder="Your name"
+            value={reviewForm.name}
+            onChange={(e) =>
+              setReviewForm((prev) => ({ ...prev, name: e.target.value }))
+            }
+          />
+          <textarea
+            placeholder="Write your review"
+            value={reviewForm.comment}
+            onChange={(e) =>
+              setReviewForm((prev) => ({ ...prev, comment: e.target.value }))
+            }
+          />
+          <select
+            value={reviewForm.rating}
+            onChange={(e) =>
+              setReviewForm((prev) => ({ ...prev, rating: e.target.value }))
+            }
+          >
+            <option value="5">5 ★</option>
+            <option value="4">4 ★</option>
+            <option value="3">3 ★</option>
+            <option value="2">2 ★</option>
+            <option value="1">1 ★</option>
+          </select>
+          <button type="submit" className="review-submit-btn">
+            Submit Review
+          </button>
+        </form>
+
+        <div className="review-list">
+          {(showAllReviews ? reviews : reviews.slice(0, 2)).map((review, index) => (
+            <div className="review-item" key={index}>
+              <div className="review-top">
+                <strong>{review.name}</strong>
+                <span>{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</span>
+              </div>
+              <p>{review.comment}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <button
+        type="button"
         className="book-btn"
         onClick={() => setShowBookingForm(true)}
       >
         Book Appointment
-      </button>    </div>
+      </button>
+    </div>
   );
 }
 

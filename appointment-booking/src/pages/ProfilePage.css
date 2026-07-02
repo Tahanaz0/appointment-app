@@ -1,0 +1,138 @@
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1318, #1b2127);
+  color: #f7f7f7;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.profile-content {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 80px;
+}
+
+.profile-panel {
+  background: rgba(20, 26, 32, 0.78);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #d4af37;
+  color: #121212;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.profile-eyebrow,
+.profile-label {
+  display: block;
+  color: #d4af37;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.profile-card h2 {
+  margin: 0;
+  font-size: 24px;
+  overflow-wrap: anywhere;
+}
+
+.profile-card p,
+.profile-empty,
+.profile-booking p {
+  margin: 6px 0 0;
+  color: #b8b8b8;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.profile-grid strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.profile-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.profile-section-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.profile-section-header button {
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 14px;
+  background: #d4af37;
+  color: #121212;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-bookings {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-booking {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-booking span {
+  color: #d4af37;
+  font-size: 13px;
+  text-align: right;
+}
+
+.profile-error {
+  color: #fca5a5;
+  margin: 0 0 16px;
+}
+
+@media (max-width: 760px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card,
+  .profile-booking {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-booking span {
+    text-align: left;
+  }
+}

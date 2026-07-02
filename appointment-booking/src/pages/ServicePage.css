@@ -94,3 +94,75 @@
     font-weight:bold;
     cursor:pointer;
 }
+
+.review-card{
+    background:#1b2127;
+    padding:25px;
+    border-radius:20px;
+    margin-top:30px;
+}
+
+.review-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.view-all-btn,
+.review-submit-btn{
+    background:#d4af37;
+    color:black;
+    border:none;
+    border-radius:10px;
+    padding:8px 12px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.review-form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.review-form input,
+.review-form textarea,
+.review-form select{
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    background:#0f1318;
+    color:white;
+}
+
+.review-form textarea{
+    min-height:80px;
+    resize:vertical;
+}
+
+.review-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.review-item{
+    background:#0f1318;
+    padding:12px 14px;
+    border-radius:12px;
+}
+
+.review-top{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:6px;
+    color:#d4af37;
+}
+
+.review-item p{
+    margin:0;
+    color:#e5e5e5;
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import "./AppointmentForm.css";
 
 function AppointmentForm({
@@ -11,10 +11,11 @@ function AppointmentForm({
   onBack,
 }) {
   const selectedSpecialist = selectedDoctor || selectedBarber;
+  const currentUser = auth.currentUser;
 
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    email: currentUser?.email || "",
     phone: "",
     barber: selectedSpecialist?.name || "",
     service: initialService,
@@ -29,18 +30,24 @@ function AppointmentForm({
     e.preventDefault();
 
     try {
-      const docRef = await addDoc(collection(db, "appointments"), formData);
+      const appointmentData = {
+        ...formData,
+        userId: currentUser?.uid || "",
+        userEmail: currentUser?.email || formData.email,
+      };
+
+      const docRef = await addDoc(collection(db, "appointments"), appointmentData);
 
       addAppointment({
         id: docRef.id,
-        ...formData,
+        ...appointmentData,
       });
 
       alert("Appointment Booked Successfully ✅");
 
       setFormData({
         name: "",
-        email: "",
+        email: currentUser?.email || "",
         phone: "",
         barber: selectedSpecialist?.name || "",
         service: initialService,

@@ -171,6 +171,8 @@
 }
 
 .view-all {
+  background: transparent;
+  border: 0;
   color: #d4af37;
   text-decoration: none;
   font-size: 12px;
@@ -264,27 +266,61 @@
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .gallery-item {
-  aspect-ratio: 1;
-  background: rgba(20, 26, 32, 0.7);
+  aspect-ratio: 4 / 3;
+  background: rgba(20, 26, 32, 0.85);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
+  overflow: hidden;
+  position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.gallery-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 12px 12px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.82));
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gallery-caption span {
+  color: #d4af37;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.gallery-caption strong {
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
 .gallery-item:hover {
   border-color: #d4af37;
-  background: rgba(20, 26, 32, 0.9);
   transform: translateY(-5px);
+}
+
+.gallery-item:hover img {
+  transform: scale(1.08);
 }
 
 /* Reviews */
@@ -374,7 +410,7 @@
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .specialist-card {
@@ -388,5 +424,11 @@
 
   .book-specialist-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-grid {
+    grid-template-columns: 1fr;
   }
 }
