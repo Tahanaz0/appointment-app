@@ -178,8 +178,10 @@ function HomePage({ addAppointment }) {
 
         <div className="bottom-nav">
           <button
-            className={`nav-btn ${location.pathname === "/" ? "active" : ""}`}
-            onClick={() => navigate("/")}
+            className={`nav-btn ${
+              location.pathname === "/" || location.pathname === "/home" ? "active" : ""
+            }`}
+            onClick={() => navigate("/home")}
           >
             🏠 Home
           </button>

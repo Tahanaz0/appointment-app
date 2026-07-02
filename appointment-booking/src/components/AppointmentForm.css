@@ -1,5 +1,5 @@
 .appointment-form-container {
-  max-width: 500px;
+  width: min(500px, calc(100% - 32px));
   margin: 0 auto;
   padding: 60px 20px;
   min-height: 100vh;
@@ -149,4 +149,33 @@
 
 .submit-btn:active {
   transform: scale(0.98);
+}
+
+@media (max-width: 560px) {
+  .appointment-form-container {
+    width: calc(100% - 24px);
+    padding: 28px 0 44px;
+  }
+
+  .form-header {
+    margin-bottom: 20px;
+  }
+
+  .form-header h2 {
+    font-size: 24px;
+  }
+
+  .doctor-selection {
+    align-items: center;
+    flex-direction: column;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .form input,
+  .form select,
+  .form textarea,
+  .submit-btn {
+    min-height: 44px;
+  }
 }
