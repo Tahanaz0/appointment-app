@@ -24,7 +24,7 @@ function AdminLoginPage() {
 
       if (role !== "admin") {
         await signOut(auth);
-        setError("Ye account admin nahi hai");
+        setError("This account is not an admin account.");
         return;
       }
 

@@ -47,12 +47,12 @@ function AppointmentForm({
       const chosenBarber = barbers.find((barber) => barber.name === formData.barber);
 
       if (chosenBarber && !chosenBarber.available) {
-        alert("Ye barber abhi unavailable hai. Please koi available barber select karein.");
+        alert("This barber is currently unavailable. Please select another available barber.");
         return;
       }
 
       if (selectedSpecialist && !selectedSpecialistAvailable) {
-        alert("Ye barber abhi unavailable hai. Please koi available barber select karein.");
+        alert("This barber is currently unavailable. Please select another available barber.");
         return;
       }
 
@@ -113,7 +113,7 @@ function AppointmentForm({
     } catch (error) {
       console.log(error);
       if (error.message === "slot-already-booked") {
-        alert("Ye time slot already booked hai. Please koi aur time select karein.");
+        alert("This time slot is already booked. Please select another time.");
       } else {
         alert("Error booking appointment");
       }
@@ -237,6 +237,8 @@ function AppointmentForm({
           onChange={(e) =>
             setFormData({ ...formData, date: e.target.value })
           }
+          onFocus={(e) => e.target.showPicker?.()}
+          onClick={(e) => e.target.showPicker?.()}
         />
 
         {/* Time */}

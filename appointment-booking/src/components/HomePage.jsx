@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -13,11 +13,25 @@ import facialImage from "../assets/image/facial1.jpg";
 import spaImage from "../assets/image/spa.jfif";
 import salonImage from "../assets/image/saloon.png";
 
-function HomePage({ addAppointment, barbers = defaultBarbers }) {
+function HomePage({
+  addAppointment,
+  appointments = [],
+  barbers = defaultBarbers,
+  reviews = [],
+  submitReview,
+  user,
+}) {
   const [selectedBarber, setSelectedBarber] = useState(null);
   const [showAllBarbers, setShowAllBarbers] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllGallery, setShowAllGallery] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    name: user?.displayName || "",
+    rating: 5,
+    text: "",
+  });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [submittedReviewIds, setSubmittedReviewIds] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,45 +72,6 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
       description: "Relaxing facial treatment for glowing skin.",
     },
   ];
-
-  const reviews = [
-    {
-      id: 1,
-      name: "Harish McKinney",
-      time: "2 days ago",
-      rating: 5,
-      text: "I came here for a quick trim and left extremely satisfied. The atmosphere is calm and relaxing. Amazing work!",
-    },
-    {
-      id: 2,
-      name: "Cameron Williamson",
-      time: "7 days ago",
-      rating: 4,
-      text: "The place was very calm and I love the service. Outstandingly good. Would definitely recommend to friends and family.",
-    },
-    {
-      id: 3,
-      name: "Ayesha Khan",
-      time: "2 weeks ago",
-      rating: 5,
-      text: "My appointment started on time and the haircut was exactly what I asked for. Very professional team.",
-    },
-    {
-      id: 4,
-      name: "Ali Raza",
-      time: "3 weeks ago",
-      rating: 5,
-      text: "Clean shop, friendly barber, and a really smooth booking experience. I will book again.",
-    },
-    {
-      id: 5,
-      name: "Sarah Ahmed",
-      time: "1 month ago",
-      rating: 4,
-      text: "Loved the facial service. The staff explained everything clearly and made the visit comfortable.",
-    },
-  ];
-
 
   const galleryItems = [
     {
@@ -141,6 +116,32 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
     ? galleryItems
     : galleryItems.slice(0, 3);
   const visibleBarbers = showAllBarbers ? barbers : barbers.slice(0, 3);
+  const pendingReviewAppointment = useMemo(
+    () =>
+      appointments.find(
+        (appointment) =>
+          appointment.status === "completed" &&
+          appointment.reviewStatus !== "submitted" &&
+          !appointment.reviewSubmitted &&
+          !submittedReviewIds.includes(appointment.id)
+      ),
+    [appointments, submittedReviewIds]
+  );
+  const reviewAppointment = pendingReviewAppointment;
+
+  const formatReviewTime = (createdAt) => {
+    const reviewDate = createdAt?.toDate?.();
+
+    if (!reviewDate) {
+      return "Just now";
+    }
+
+    return reviewDate.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   const handleSelectBarber = (barber) => {
     if (!barber.available) {
@@ -160,6 +161,34 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
       navigate("/login");
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleReviewSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!reviewAppointment || !submitReview) {
+      return;
+    }
+
+    try {
+      setIsSubmittingReview(true);
+      await submitReview(reviewAppointment, {
+        ...reviewForm,
+        name: reviewForm.name.trim() || reviewAppointment.name || "Customer",
+        text: reviewForm.text.trim(),
+      });
+      setSubmittedReviewIds((prev) => [...prev, reviewAppointment.id]);
+      setReviewForm({
+        name: user?.displayName || "",
+        rating: 5,
+        text: "",
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Unable to submit review. Please try again.");
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -278,6 +307,9 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
                 <div className="specialist-info">
                   <h4>{barber.name}</h4>
                   <p className="specialty">{barber.specialty}</p>
+                  {barber.workingHours && (
+                    <p className="barber-hours">{barber.workingHours}</p>
+                  )}
                   <p className="availability">
                     {barber.available ? (
                       <span className="available">✓ Available</span>
@@ -340,12 +372,19 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
           </div>
 
           <div className="reviews-list">
-            {(showAllReviews ? reviews : reviews.slice(0, 2)).map((review) => (
+            {reviews.length === 0 ? (
+              <div className="review-empty">
+                Customer reviews will appear here after services are completed.
+              </div>
+            ) : (
+              (showAllReviews ? reviews : reviews.slice(0, 2)).map((review) => (
               <div key={review.id} className="review-card">
                 <div className="review-header">
                   <div className="reviewer-info">
                     <h5>{review.name}</h5>
-                    <span className="review-time">{review.time}</span>
+                    <span className="review-time">
+                      {formatReviewTime(review.createdAt)}
+                    </span>
                   </div>
                   <div className="review-rating">
                     {"⭐".repeat(review.rating)}
@@ -353,7 +392,8 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
                 </div>
                 <p className="review-text">{review.text}</p>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -361,6 +401,71 @@ function HomePage({ addAppointment, barbers = defaultBarbers }) {
         <div style={{ height: "80px" }}></div>
       </div>
 
+      {reviewAppointment && (
+        <div className="review-modal-backdrop" role="dialog" aria-modal="true">
+          <form className="review-modal" onSubmit={handleReviewSubmit}>
+            <div className="review-modal-header">
+              <span>Service completed</span>
+              <h3>Rate your visit</h3>
+              <p>
+                {reviewAppointment.service || "Your service"} with{" "}
+                {reviewAppointment.barber ||
+                  reviewAppointment.doctor ||
+                  "GentleCuts"}
+              </p>
+            </div>
+
+            <label>
+              Your name
+              <input
+                type="text"
+                value={reviewForm.name}
+                onChange={(event) =>
+                  setReviewForm({ ...reviewForm, name: event.target.value })
+                }
+                placeholder="Customer name"
+              />
+            </label>
+
+            <label>
+              Rating
+              <select
+                value={reviewForm.rating}
+                onChange={(event) =>
+                  setReviewForm({ ...reviewForm, rating: Number(event.target.value) })
+                }
+              >
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+            </label>
+
+            <label>
+              Review
+              <textarea
+                required
+                rows="4"
+                value={reviewForm.text}
+                onChange={(event) =>
+                  setReviewForm({ ...reviewForm, text: event.target.value })
+                }
+                placeholder="Apna experience likhein"
+              />
+            </label>
+
+            <button
+              type="submit"
+              className="review-submit-modal-btn"
+              disabled={isSubmittingReview || !reviewForm.text.trim()}
+            >
+              {isSubmittingReview ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+        </div>
+      )}
 
     </div>
   );

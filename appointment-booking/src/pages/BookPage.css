@@ -127,6 +127,12 @@
   padding: 7px 10px;
 }
 
+.booking-status.completed {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.28);
+  color: #f6d66a;
+}
+
 .booking-details-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

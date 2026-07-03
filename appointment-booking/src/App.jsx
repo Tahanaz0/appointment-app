@@ -1,7 +1,18 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-import { collection, deleteDoc, doc, getDoc, query, onSnapshot, where } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "./firebase";
 import SignupPage from "./components/SignupPage";
@@ -15,6 +26,8 @@ import BookPage from "./pages/BookPage";
 import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
 import SpecialistPage from "./pages/SpecialistPage";
+import AdminChatPage from "./pages/AdminChatPage";
+import AdminCompletedBookings from "./pages/AdminCompletedBookings";
 import defaultBarbers from "./components/data/barbers";
 
 const createSlotId = (date, time) =>
@@ -26,15 +39,30 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [visitedApp, setVisitedApp] = useState(false);
-  const [barberAvailability, setBarberAvailability] = useState({});
+  const [firestoreBarbers, setFirestoreBarbers] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
-  const barbers = defaultBarbers.map((barber) => ({
-    ...barber,
-    available:
-      barberAvailability[barber.id] === undefined
-        ? barber.available
-        : barberAvailability[barber.id],
-  }));
+  const barbers = [
+    ...defaultBarbers.map((barber) => {
+      const firestoreBarber = firestoreBarbers.find(
+        (item) => String(item.id) === String(barber.id)
+      );
+
+      return firestoreBarber
+        ? {
+            ...barber,
+            ...firestoreBarber,
+            available:
+              firestoreBarber.available === undefined
+                ? barber.available
+                : firestoreBarber.available,
+          }
+        : barber;
+    }),
+    ...firestoreBarbers.filter(
+      (item) => !defaultBarbers.some((barber) => String(barber.id) === String(item.id))
+    ),
+  ];
 
   // Check authentication state
   useEffect(() => {
@@ -97,20 +125,42 @@ function App() {
     const unsubscribe = onSnapshot(
       collection(db, "barbers"),
       (snapshot) => {
-        const availability = {};
+        const barberList = [];
 
         snapshot.forEach((barberDoc) => {
-          const data = barberDoc.data();
-
-          if (typeof data.available === "boolean") {
-            availability[barberDoc.id] = data.available;
-          }
+          barberList.push({ id: barberDoc.id, ...barberDoc.data() });
         });
 
-        setBarberAvailability(availability);
+        setFirestoreBarbers(barberList);
       },
       (error) => {
         console.error("Error fetching barbers:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "reviews"),
+      (snapshot) => {
+        const reviewList = [];
+
+        snapshot.forEach((reviewDoc) => {
+          reviewList.push({ id: reviewDoc.id, ...reviewDoc.data() });
+        });
+
+        reviewList.sort((first, second) => {
+          const firstTime = first.createdAt?.toMillis?.() || 0;
+          const secondTime = second.createdAt?.toMillis?.() || 0;
+          return secondTime - firstTime;
+        });
+
+        setReviews(reviewList);
+      },
+      (error) => {
+        console.error("Error fetching reviews:", error);
       }
     );
 
@@ -136,6 +186,38 @@ function App() {
     if (bookingSlotId) {
       await deleteDoc(doc(db, "bookingSlots", bookingSlotId));
     }
+  };
+
+  const completeAppointment = async (appointmentId) => {
+    await updateDoc(doc(db, "appointments", appointmentId), {
+      status: "completed",
+      completedAt: serverTimestamp(),
+      reviewStatus: "pending",
+      reviewSubmitted: false,
+    });
+  };
+
+  const submitReview = async (appointment, reviewData) => {
+    const appointmentRef = doc(db, "appointments", appointment.id);
+    const reviewRef = doc(db, "reviews", appointment.id);
+
+    await setDoc(reviewRef, {
+      appointmentId: appointment.id,
+      userId: user?.uid || appointment.userId || "",
+      userEmail: user?.email || appointment.userEmail || appointment.email || "",
+      name: reviewData.name,
+      rating: Number(reviewData.rating),
+      text: reviewData.text,
+      service: appointment.service || "",
+      barber: appointment.barber || appointment.doctor || "",
+      createdAt: serverTimestamp(),
+    });
+
+    await updateDoc(appointmentRef, {
+      reviewSubmitted: true,
+      reviewStatus: "submitted",
+      reviewedAt: serverTimestamp(),
+    });
   };
 
   if (loading) {
@@ -197,6 +279,9 @@ function App() {
                   appointments={appointments}
                   addAppointment={addAppointment}
                   barbers={barbers}
+                  reviews={reviews}
+                  submitReview={submitReview}
+                  user={user}
                 />
               </div>
             ) : user ? (
@@ -235,6 +320,33 @@ function App() {
           }
         />
         <Route
+          path="/admin/chat"
+          element={
+            user && userRole === "admin" ? (
+              <AdminChatPage />
+            ) : user ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/completed-bookings"
+          element={
+            user && userRole === "admin" ? (
+              <AdminCompletedBookings
+                appointments={appointments}
+                deleteAppointment={deleteAppointment}
+              />
+            ) : user ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
           path="/profile"
           element={
             user && userRole !== "admin" ? (
@@ -250,11 +362,12 @@ function App() {
           path="/admin/dashboard"
           element={
             user && userRole === "admin" ? (
-              <AdminDashboard
-                appointments={appointments}
-                deleteAppointment={deleteAppointment}
-                barbers={barbers}
-              />
+                <AdminDashboard
+                  appointments={appointments}
+                  deleteAppointment={deleteAppointment}
+                  barbers={barbers}
+                  completeAppointment={completeAppointment}
+                />
             ) : user ? (
               <Navigate to="/home" replace />
             ) : (

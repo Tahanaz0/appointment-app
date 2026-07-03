@@ -23,7 +23,7 @@ function ProfilePage({ user, appointments = [] }) {
         setProfile(profileSnap.exists() ? profileSnap.data() : null);
       } catch (err) {
         console.error(err);
-        setError("Profile data load nahi ho saka");
+        setError("Unable to load profile data. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -116,7 +116,7 @@ function ProfilePage({ user, appointments = [] }) {
               </div>
 
               {appointments.length === 0 ? (
-                <p className="profile-empty">Abhi is user ki koi booking nahi hai.</p>
+                <p className="profile-empty">This user has no bookings yet.</p>
               ) : (
                 <div className="profile-bookings">
                   {appointments.slice(0, 3).map((appointment) => (

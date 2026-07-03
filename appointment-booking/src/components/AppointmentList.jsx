@@ -1,4 +1,12 @@
 function AppointmentList({ appointments, onDelete }) {
+  const getStatusLabel = (item) => {
+    if (item.status === "completed") {
+      return item.reviewSubmitted ? "Reviewed" : "Review Pending";
+    }
+
+    return "Booked";
+  };
+
   const handleDelete = async (appointmentId) => {
     const shouldDelete = window.confirm("Delete this booking?");
 
@@ -10,7 +18,7 @@ function AppointmentList({ appointments, onDelete }) {
       await onDelete(appointmentId);
     } catch (error) {
       console.error(error);
-      alert("Booking delete nahi ho saki");
+      alert("Unable to delete booking. Please try again.");
     }
   };
 
@@ -41,7 +49,9 @@ function AppointmentList({ appointments, onDelete }) {
                   <h3>{item.name}</h3>
                   <p>{item.email}</p>
                 </div>
-                <span className="booking-status">Booked</span>
+                <span className={`booking-status ${item.status === "completed" ? "completed" : ""}`}>
+                  {getStatusLabel(item)}
+                </span>
               </div>
 
               <div className="booking-details-grid">
