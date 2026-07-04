@@ -1,5 +1,5 @@
 import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, serverTimestamp, setDoc, addDoc, collection, deleteDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
@@ -30,6 +30,7 @@ function AdminDashboard({
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [editingGalleryItem, setEditingGalleryItem] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const specialtyOptions = [
     "Senior Barber",
@@ -133,7 +134,6 @@ function AdminDashboard({
       setIsModalOpen(false);
     } catch (error) {
       console.error(error);
-      alert("Unable to save barber. Please try again.");
     }
   };
 
@@ -158,7 +158,6 @@ function AdminDashboard({
       }
     } catch (error) {
       console.error(error);
-      alert("Unable to delete. Please try again.");
     } finally {
       setDeleteConfirmation(null);
     }
@@ -224,7 +223,6 @@ function AdminDashboard({
       setIsGalleryModalOpen(false);
     } catch (error) {
       console.error(error);
-      alert("Unable to save gallery item. Please try again.");
     }
   };
 
@@ -233,7 +231,6 @@ function AdminDashboard({
       await deleteDoc(doc(db, "galleryItems", item.id));
     } catch (error) {
       console.error(error);
-      alert("Unable to delete gallery item. Please try again.");
     }
   };
 
@@ -250,7 +247,6 @@ function AdminDashboard({
       );
     } catch (error) {
       console.error(error);
-      alert("Unable to update barber availability. Please try again.");
     }
   };
 
@@ -263,7 +259,6 @@ function AdminDashboard({
       await completeAppointment(appointment.id);
     } catch (error) {
       console.error(error);
-      alert("Unable to complete appointment. Please try again.");
     }
   };
 
@@ -278,18 +273,46 @@ function AdminDashboard({
   return (
     <div className="admin-page">
       <header className="admin-header">
-        <div>
+        <div className="header-left">
           <span className="admin-eyebrow">Admin Panel</span>
           <h1>GentleCuts Dashboard</h1>
+          <p className="header-time">Manage bookings, barbers, gallery and chat</p>
         </div>
 
-        <div>
-          <button type="button" onClick={() => navigate("/admin/completed-bookings")}>Completed Bookings</button>
-          <button type="button" onClick={() => navigate("/admin/chat")}>Chat</button>
-          <button type="button" onClick={handleLogout}>
-            Logout
+        <div className="admin-bottom-nav">
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/dashboard" ? "active" : ""}`}
+            onClick={() => navigate("/admin/dashboard")}
+          >
+            Dashboard
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/completed-bookings" ? "active" : ""}`}
+            onClick={() => navigate("/admin/completed-bookings")}
+          >
+            Completed
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/chat" ? "active" : ""}`}
+            onClick={() => navigate("/admin/chat")}
+          >
+            Chat
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/profile" ? "active" : ""}`}
+            onClick={() => navigate("/admin/profile")}
+          >
+            Profile
           </button>
         </div>
+
+        <button type="button" className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </header>
 
       <main className="admin-content">

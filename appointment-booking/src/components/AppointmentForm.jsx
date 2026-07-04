@@ -34,6 +34,8 @@ function AppointmentForm({
     doctor: selectedSpecialist?.name || "",
     doctorId: selectedSpecialist?.id || "",
   });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const selectedBarberRecord = barbers.find(
     (barber) => barber.name === formData.barber
   );
@@ -47,12 +49,18 @@ function AppointmentForm({
       const chosenBarber = barbers.find((barber) => barber.name === formData.barber);
 
       if (chosenBarber && !chosenBarber.available) {
-        alert("This barber is currently unavailable. Please select another available barber.");
+        setFeedback({
+          type: "error",
+          message: "This barber is currently unavailable. Please select another available barber.",
+        });
         return;
       }
 
       if (selectedSpecialist && !selectedSpecialistAvailable) {
-        alert("This barber is currently unavailable. Please select another available barber.");
+        setFeedback({
+          type: "error",
+          message: "This barber is currently unavailable. Please select another available barber.",
+        });
         return;
       }
 
@@ -94,7 +102,7 @@ function AppointmentForm({
         ...appointmentData,
       });
 
-      alert("Appointment Booked Successfully ✅");
+      setShowSuccessModal(true);
 
       setFormData({
         name: "",
@@ -109,15 +117,22 @@ function AppointmentForm({
         doctorId: selectedSpecialist?.id || "",
       });
 
-      onBack();
     } catch (error) {
       console.log(error);
       if (error.message === "slot-already-booked") {
-        alert("This time slot is already booked. Please select another time.");
+        setFeedback({
+          type: "error",
+          message: "This time slot is already booked. Please select another time.",
+        });
       } else {
-        alert("Error booking appointment");
+        setFeedback({ type: "error", message: "Error booking appointment" });
       }
     }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    onBack();
   };
 
   return (
@@ -150,6 +165,10 @@ function AppointmentForm({
           </div>
         </div> */}
       </div>
+
+      {feedback.message && (
+        <div className={`appointment-feedback ${feedback.type}`}>{feedback.message}</div>
+      )}
 
       <form className="form" onSubmit={handleSubmit}>
         {/* Name */}
@@ -283,6 +302,19 @@ function AppointmentForm({
           Confirm Booking
         </button>
       </form>
+
+      {showSuccessModal && (
+        <div className="success-modal-backdrop" role="dialog" aria-modal="true">
+          <div className="success-modal">
+            <div className="success-modal-icon">✓</div>
+            <h3>Appointment Booked</h3>
+            <p>Your appointment request has been confirmed successfully.</p>
+            <button type="button" className="success-modal-btn" onClick={handleSuccessModalClose}>
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

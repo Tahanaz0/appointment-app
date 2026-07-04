@@ -1,5 +1,5 @@
 import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { auth } from "../firebase";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
@@ -8,6 +8,7 @@ import "./AdminDashboard.css";
 function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const completedBookings = appointments.filter((item) => item.status === "completed");
   const completedCount = completedBookings.length;
@@ -38,7 +39,6 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
       await deleteAppointment(deleteConfirmation.item.id);
     } catch (error) {
       console.error(error);
-      alert("Unable to delete booking. Please try again.");
     } finally {
       setDeleteConfirmation(null);
     }
@@ -51,16 +51,46 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
   return (
     <div className="admin-page">
       <header className="admin-header">
-        <div>
+        <div className="header-left">
           <span className="admin-eyebrow">Admin Panel</span>
           <h1>Completed Bookings</h1>
+          <p className="header-time">Review finished appointments</p>
         </div>
 
-        <div>
-          <button type="button" onClick={() => navigate("/admin/dashboard")}>Dashboard</button>
-          <button type="button" onClick={() => navigate("/admin/chat")}>Chat</button>
-          <button type="button" onClick={handleLogout}>Logout</button>
+        <div className="admin-bottom-nav">
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/dashboard" ? "active" : ""}`}
+            onClick={() => navigate("/admin/dashboard")}
+          >
+            Dashboard
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/completed-bookings" ? "active" : ""}`}
+            onClick={() => navigate("/admin/completed-bookings")}
+          >
+            Completed
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/chat" ? "active" : ""}`}
+            onClick={() => navigate("/admin/chat")}
+          >
+            Chat
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/profile" ? "active" : ""}`}
+            onClick={() => navigate("/admin/profile")}
+          >
+            Profile
+          </button>
         </div>
+
+        <button type="button" className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </header>
 
       <main className="admin-content">

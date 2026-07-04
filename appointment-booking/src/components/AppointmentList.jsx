@@ -1,4 +1,6 @@
 function AppointmentList({ appointments, onDelete }) {
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
   const getStatusLabel = (item) => {
     if (item.status === "completed") {
       return item.reviewSubmitted ? "Reviewed" : "Review Pending";
@@ -8,22 +10,41 @@ function AppointmentList({ appointments, onDelete }) {
   };
 
   const handleDelete = async (appointmentId) => {
-    const shouldDelete = window.confirm("Delete this booking?");
+    setPendingDeleteId(appointmentId);
+  };
 
-    if (!shouldDelete) {
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) {
       return;
     }
 
     try {
-      await onDelete(appointmentId);
+      await onDelete(pendingDeleteId);
     } catch (error) {
       console.error(error);
-      alert("Unable to delete booking. Please try again.");
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
   return (
     <div className="list">
+      {pendingDeleteId && (
+        <div className="delete-confirmation-modal">
+          <div className="delete-confirmation-card">
+            <h3>Delete booking?</h3>
+            <p>This action cannot be undone.</p>
+            <div className="delete-actions">
+              <button type="button" className="cancel-delete-btn" onClick={() => setPendingDeleteId(null)}>
+                Cancel
+              </button>
+              <button type="button" className="confirm-delete-btn" onClick={confirmDelete}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="booking-list-header">
         <div>
           <span className="booking-eyebrow">Appointments</span>

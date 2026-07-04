@@ -113,7 +113,6 @@ function App() {
       },
       (error) => {
         console.error("Error fetching appointments:", error);
-        alert("Error loading appointments: " + error.message);
       }
     );
 
@@ -340,7 +339,19 @@ function App() {
             user && userRole !== "admin" ? (
               <ProfilePage user={user} appointments={appointments} />
             ) : user ? (
-              <Navigate to="/admin/dashboard" replace />
+              <Navigate to="/admin/profile" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/profile"
+          element={
+            user && userRole === "admin" ? (
+              <ProfilePage user={user} appointments={appointments} isAdmin />
+            ) : user ? (
+              <Navigate to="/home" replace />
             ) : (
               <Navigate to="/login" replace />
             )

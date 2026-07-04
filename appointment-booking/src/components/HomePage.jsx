@@ -224,7 +224,7 @@ function HomePage({
       });
     } catch (error) {
       console.error(error);
-      alert("Unable to submit review. Please try again.");
+      setReviewError("Unable to submit review. Please try again.");
     } finally {
       setIsSubmittingReview(false);
     }

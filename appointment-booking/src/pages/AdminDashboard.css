@@ -6,22 +6,21 @@
 }
 
 .admin-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(170px, auto) minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 20px;
+  gap: 16px;
+  padding: 18px 20px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   background: rgba(20, 26, 32, 0.94);
+  backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 20;
 }
 
-.admin-header > div:last-child {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.header-left {
+  min-width: 0;
 }
 
 .admin-header h1 {
@@ -31,19 +30,69 @@
   margin: 4px 0 0;
 }
 
-.admin-header button,
-.admin-actions button {
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 800;
+.admin-header .header-time {
+  color: #aaa;
+  font-size: 12px;
+  margin: 5px 0 0;
 }
 
-.admin-header button {
+.admin-bottom-nav {
+  background: rgba(20, 26, 32, 0.95);
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.14);
+  border-radius: 10px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.admin-bottom-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-nav-btn,
+.admin-actions button {
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.admin-nav-btn {
+  background: none;
+  color: #aaa;
+  min-height: 38px;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.admin-nav-btn:hover,
+.admin-nav-btn.active {
+  background: rgba(212, 175, 55, 0.1);
+  color: #d4af37;
+}
+
+.admin-header .logout-btn {
   background: #d4af37;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  min-height: 38px;
+  white-space: nowrap;
   color: #121212;
-  min-height: 40px;
-  padding: 9px 16px;
+}
+
+.admin-header .logout-btn:hover {
+  transform: scale(1.05);
+  background: #e6c945;
 }
 
 .admin-add-barber-header-btn {
@@ -494,6 +543,18 @@
   color: #dcfce7;
 }
 
+@media (max-width: 980px) {
+  .admin-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .admin-bottom-nav {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 800px) {
   .admin-stats,
   .admin-booking-grid {
@@ -508,13 +569,38 @@
 @media (max-width: 560px) {
   .admin-header {
     align-items: stretch;
-    flex-direction: column;
-    padding: 16px 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 14px;
   }
 
-  .admin-header button,
+  .admin-header .logout-btn,
   .admin-actions button {
     width: 100%;
+  }
+
+  .admin-bottom-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    justify-content: stretch;
+    padding: 7px;
+    border-radius: 12px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .admin-nav-btn {
+    min-width: 0;
+    min-height: 42px;
+    padding: 7px 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .admin-content {

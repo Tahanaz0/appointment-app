@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   collection,
   doc,
@@ -16,6 +16,7 @@ import "./ChatPage.css";
 
 function AdminChatPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [threads, setThreads] = useState([]);
   const [selectedThread, setSelectedThread] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -88,18 +89,41 @@ function AdminChatPage() {
 
   return (
     <div className="chat-page">
-      <div className="home-header">
+      <div className="admin-header">
         <div className="header-left">
-          <h1 className="brand-title">GentleCuts Admin Chat</h1>
+          <span className="admin-eyebrow">Admin Panel</span>
+          <h1>GentleCuts Admin Chat</h1>
           <p className="header-time">Support customer messaging</p>
         </div>
 
-        <div className="bottom-nav">
-          <button className="nav-btn" onClick={() => navigate("/admin/dashboard")}>
+        <div className="admin-bottom-nav">
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/dashboard" ? "active" : ""}`}
+            onClick={() => navigate("/admin/dashboard")}
+          >
             Dashboard
           </button>
-          <button className="nav-btn active" onClick={() => navigate("/admin/chat")}>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/completed-bookings" ? "active" : ""}`}
+            onClick={() => navigate("/admin/completed-bookings")}
+          >
+            Completed
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/chat" ? "active" : ""}`}
+            onClick={() => navigate("/admin/chat")}
+          >
             Chat
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-btn ${location.pathname === "/admin/profile" ? "active" : ""}`}
+            onClick={() => navigate("/admin/profile")}
+          >
+            Profile
           </button>
         </div>
 

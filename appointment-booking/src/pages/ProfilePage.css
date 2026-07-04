@@ -23,6 +23,21 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 16px;
+  position: relative;
+}
+
+.profile-card-edit-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.16);
+  color: #f7d46b;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 10px;
 }
 
 .profile-avatar {
@@ -73,6 +88,98 @@
   overflow-wrap: anywhere;
 }
 
+.profile-card-details {
+  min-width: 0;
+}
+
+.profile-edit-form {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-edit-form label {
+  display: grid;
+  gap: 6px;
+  color: #e5e7eb;
+  font-size: 13px;
+}
+
+.profile-edit-form input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 8px;
+  color: #fff;
+  padding: 10px 12px;
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.profile-edit-actions button {
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 9px 14px;
+  font-weight: 700;
+  background: #d4af37;
+  color: #121212;
+}
+
+.profile-cancel-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.profile-summary p {
+  margin: 6px 0 0;
+  color: #e5e7eb;
+}
+
+.profile-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 500;
+}
+
+.profile-modal {
+  width: min(100%, 480px);
+  background: #141a20;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+}
+
+.profile-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.profile-modal-header h3 {
+  margin: 0;
+  color: #fff;
+}
+
+.profile-modal-close {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
 .profile-section-header {
   display: flex;
   align-items: center;
@@ -119,6 +226,40 @@
 .profile-error {
   color: #fca5a5;
   margin: 0 0 16px;
+}
+
+.profile-success {
+  color: #bbf7d0;
+  margin: 0 0 16px;
+}
+
+.profile-password-help {
+  margin: 2px 0 0;
+  color: #c9c9c9;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.profile-admin-overview {
+  margin-bottom: 16px;
+}
+
+.profile-admin-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.profile-admin-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.14);
+  color: #f7d46b;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 @media (max-width: 760px) {
