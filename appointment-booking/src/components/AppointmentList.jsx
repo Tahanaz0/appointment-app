@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function AppointmentList({ appointments, onDelete }) {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
