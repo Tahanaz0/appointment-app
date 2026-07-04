@@ -1,33 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import { auth, db } from "../firebase";
 import "./ChatPage.css";
 
 function ChatPage() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
-
-  const conversations = [
-    {
-      id: 1,
-      sender: "support",
-      text: "Hi, welcome to GentleCuts. How can we help with your appointment today?",
-      time: "09:30 AM",
-    },
-    {
-      id: 2,
-      sender: "user",
-      text: "I want to confirm my haircut booking time.",
-      time: "09:32 AM",
-    },
-    {
-      id: 3,
-      sender: "support",
-      text: "Sure. Please share your name or phone number and we will check your booking.",
-      time: "09:33 AM",
-    },
-  ];
+  const [messages, setMessages] = useState([]);
+  const [threadId, setThreadId] = useState(null);
+  const [threadInfo, setThreadInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const quickReplies = [
     "Confirm booking",
@@ -35,6 +28,46 @@ function ChatPage() {
     "Ask price",
     "Cancel booking",
   ];
+
+  useEffect(() => {
+    const initializeThread = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userEmail = user.email || "customer@example.com";
+      const userName = user.displayName || user.email?.split("@")[0] || "Customer";
+      const threadKey = `user-${user.uid}`;
+      const threadRef = doc(db, "chats", threadKey);
+      const threadSnap = await setDoc(
+        threadRef,
+        {
+          userId: user.uid,
+          userEmail,
+          userName,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastMessage: "",
+        },
+        { merge: true }
+      );
+
+      setThreadId(threadKey);
+      setThreadInfo({ userEmail, userName });
+
+      const messagesQuery = query(collection(db, "chats", threadKey, "messages"), orderBy("createdAt"));
+      const unsub = onSnapshot(messagesQuery, (snapshot) => {
+        setMessages(snapshot.docs.map((docSnapshot) => ({ id: docSnapshot.id, ...docSnapshot.data() })));
+        setLoading(false);
+      });
+
+      return () => unsub();
+    };
+
+    const unsubscribePromise = initializeThread();
+    return () => {
+      unsubscribePromise?.then((cleanup) => cleanup?.());
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -45,8 +78,28 @@ function ChatPage() {
     }
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
+    const trimmed = message.trim();
+    if (!trimmed || !threadId) return;
+
+    const threadRef = doc(db, "chats", threadId);
+    await addDoc(collection(db, "chats", threadId, "messages"), {
+      sender: "user",
+      text: trimmed,
+      createdAt: serverTimestamp(),
+      senderName: threadInfo?.userName || "You",
+    });
+
+    await setDoc(
+      threadRef,
+      {
+        lastMessage: trimmed,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
     setMessage("");
   };
 
@@ -117,17 +170,28 @@ function ChatPage() {
             <div className="messages-area">
               <div className="message-date">Today</div>
 
-              {conversations.map((item) => (
-                <div
-                  className={`message-row ${item.sender === "user" ? "from-user" : "from-support"}`}
-                  key={item.id}
-                >
-                  <div className="message-bubble">
-                    <p>{item.text}</p>
-                    <span>{item.time}</span>
+              {loading ? (
+                <div className="message-date">Loading messages...</div>
+              ) : messages.length === 0 ? (
+                <div className="message-date">Start a conversation with the salon.</div>
+              ) : (
+                messages.map((item) => (
+                  <div
+                    className={`message-row ${item.sender === "user" ? "from-user" : "from-support"}`}
+                    key={item.id}
+                  >
+                    <div className="message-bubble">
+                      <p>{item.text}</p>
+                      <span>
+                        {item.createdAt?.toDate?.().toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }) || ""}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="quick-replies">

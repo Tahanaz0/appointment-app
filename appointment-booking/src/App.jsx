@@ -18,7 +18,6 @@ import { db, auth } from "./firebase";
 import SignupPage from "./components/SignupPage";
 import SplashScreen from "./components/SplashScreen";
 import LoginPage from "./components/LoginPage";
-import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import HomePage from "./components/HomePage";
 import ServicePage from "./pages/ServicePage";
@@ -257,17 +256,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/admin/login"
-          element={
-            user ? (
-              <Navigate to={userRole === "admin" ? "/admin/dashboard" : "/home"} replace />
-            ) : (
-              <AdminLoginPage />
-            )
-          }
-        />
-
         <Route path="/signup" element={<SignupPage />} />
         {/* Home Page - Protected */}
         <Route
@@ -371,7 +359,7 @@ function App() {
             ) : user ? (
               <Navigate to="/home" replace />
             ) : (
-              <Navigate to="/admin/login" replace />
+              <Navigate to="/login" replace />
             )
           }
         />

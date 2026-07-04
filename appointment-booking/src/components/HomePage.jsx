@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import { addDoc, collection, onSnapshot } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import AppointmentForm from "./AppointmentForm";
 import "./HomePage.css";
@@ -12,6 +13,45 @@ import colorImage from "../assets/image/color1.jpg";
 import facialImage from "../assets/image/facial1.jpg";
 import spaImage from "../assets/image/spa.jfif";
 import salonImage from "../assets/image/saloon.png";
+
+const defaultGalleryItems = [
+  {
+    id: 1,
+    src: haircutImage,
+    title: "Modern Haircut",
+    category: "Haircut",
+  },
+  {
+    id: 2,
+    src: beardImage,
+    title: "Beard Styling",
+    category: "Beard",
+  },
+  {
+    id: 3,
+    src: colorImage,
+    title: "Hair Color",
+    category: "Color",
+  },
+  {
+    id: 4,
+    src: facialImage,
+    title: "Facial Care",
+    category: "Facial",
+  },
+  {
+    id: 5,
+    src: spaImage,
+    title: "Relaxing Spa",
+    category: "Spa",
+  },
+  {
+    id: 6,
+    src: salonImage,
+    title: "Salon Interior",
+    category: "Studio",
+  },
+];
 
 function HomePage({
   addAppointment,
@@ -25,6 +65,8 @@ function HomePage({
   const [showAllBarbers, setShowAllBarbers] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllGallery, setShowAllGallery] = useState(false);
+  const [galleryItems, setGalleryItems] = useState(defaultGalleryItems);
+  const hasSeededGalleryRef = useRef(false);
   const [reviewForm, setReviewForm] = useState({
     name: user?.displayName || "",
     rating: 5,
@@ -37,6 +79,41 @@ function HomePage({
 
  
   
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "galleryItems"), async (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      }));
+
+      if (items.length > 0) {
+        setGalleryItems(items);
+        return;
+      }
+
+      if (!hasSeededGalleryRef.current) {
+        hasSeededGalleryRef.current = true;
+
+        try {
+          await Promise.all(
+            defaultGalleryItems.map((item) =>
+              addDoc(collection(db, "galleryItems"), {
+                ...item,
+                id: undefined,
+              })
+            )
+          );
+        } catch (error) {
+          console.error("Unable to seed gallery items:", error);
+        }
+      }
+
+      setGalleryItems(defaultGalleryItems);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const services = [
     {
@@ -70,45 +147,6 @@ function HomePage({
       price: "$40",
       duration: "45 min",
       description: "Relaxing facial treatment for glowing skin.",
-    },
-  ];
-
-  const galleryItems = [
-    {
-      id: 1,
-      src: haircutImage,
-      title: "Modern Haircut",
-      category: "Haircut",
-    },
-    {
-      id: 2,
-      src: beardImage,
-      title: "Beard Styling",
-      category: "Beard",
-    },
-    {
-      id: 3,
-      src: colorImage,
-      title: "Hair Color",
-      category: "Color",
-    },
-    {
-      id: 4,
-      src: facialImage,
-      title: "Facial Care",
-      category: "Facial",
-    },
-    {
-      id: 5,
-      src: spaImage,
-      title: "Relaxing Spa",
-      category: "Spa",
-    },
-    {
-      id: 6,
-      src: salonImage,
-      title: "Salon Interior",
-      category: "Studio",
     },
   ];
 

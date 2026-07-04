@@ -299,6 +299,51 @@
   margin-bottom: 30px;
 }
 
+.gallery-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-gallery-btn,
+.save-gallery-btn,
+.remove-gallery-btn {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+  transition: all 0.3s ease;
+}
+
+.edit-gallery-btn {
+  background: rgba(212, 175, 55, 0.16);
+  color: #f7d46b;
+}
+
+.save-gallery-btn {
+  background: #d4af37;
+  color: #121212;
+}
+
+.remove-gallery-btn {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fecaca;
+}
+
+.gallery-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gallery-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -356,6 +401,56 @@
 
 .gallery-item:hover img {
   transform: scale(1.08);
+}
+
+.gallery-edit-card {
+  background: rgba(20, 26, 32, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gallery-upload-label {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.gallery-upload-label input {
+  display: none;
+}
+
+.gallery-upload-label img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.gallery-upload-label span {
+  display: block;
+  text-align: center;
+  color: #d4af37;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.gallery-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gallery-edit-fields input {
+  padding: 9px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
 }
 
 /* Reviews */

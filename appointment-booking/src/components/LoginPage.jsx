@@ -7,6 +7,7 @@ import "./LoginPage.css";
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginMode, setLoginMode] = useState("user");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/home");
+      navigate(loginMode === "admin" ? "/admin/dashboard" : "/home");
     } catch (err) {
       console.log(err);
       setError(err.code);
@@ -32,6 +33,23 @@ function LoginPage() {
       <div className="login-container">
         <h1 className="login-title">GentleCuts</h1>
         <p className="login-subtitle">Welcome Back</p>
+
+        <div className="login-mode-switch">
+          <button
+            type="button"
+            className={`mode-btn ${loginMode === "user" ? "active" : ""}`}
+            onClick={() => setLoginMode("user")}
+          >
+            User Login
+          </button>
+          <button
+            type="button"
+            className={`mode-btn ${loginMode === "admin" ? "active" : ""}`}
+            onClick={() => setLoginMode("admin")}
+          >
+            Admin Login
+          </button>
+        </div>
 
         <form onSubmit={handleLogin} className="login-form">
           <input
@@ -55,15 +73,12 @@ function LoginPage() {
           {error && <p className="error-message">{error}</p>}
 
           <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : loginMode === "admin" ? "Admin Login" : "User Login"}
           </button>
         </form>
 
         <p className="signup-text">
           Don't have an account? <a href="/signup">Sign Up</a>
-        </p>
-        <p className="signup-text">
-          Admin account? <a href="/admin/login">Admin Login</a>
         </p>
       </div>
     </div>

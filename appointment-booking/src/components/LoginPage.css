@@ -47,6 +47,29 @@
   margin-bottom: 30px;
 }
 
+.login-mode-switch {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mode-btn.active {
+  background: #d4af37;
+  color: #121212;
+  font-weight: 600;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;

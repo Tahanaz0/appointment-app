@@ -1,7 +1,7 @@
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { doc, serverTimestamp, setDoc, addDoc, collection, deleteDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { doc, serverTimestamp, setDoc, addDoc, collection, deleteDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import "./AdminDashboard.css";
@@ -24,6 +24,11 @@ function AdminDashboard({
   });
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [bookingTab, setBookingTab] = useState("all");
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [galleryForm, setGalleryForm] = useState({ title: "", category: "", src: "" });
+  const [galleryPreview, setGalleryPreview] = useState("");
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [editingGalleryItem, setEditingGalleryItem] = useState(null);
   const navigate = useNavigate();
 
   const specialtyOptions = [
@@ -53,6 +58,18 @@ function AdminDashboard({
   const customers = new Set(
     appointments.map((item) => item.userEmail || item.email).filter(Boolean)
   ).size;
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "galleryItems"), (snapshot) => {
+      const items = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      }));
+      setGalleryItems(items);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -144,6 +161,79 @@ function AdminDashboard({
       alert("Unable to delete. Please try again.");
     } finally {
       setDeleteConfirmation(null);
+    }
+  };
+
+  const openNewGalleryItem = () => {
+    setEditingGalleryItem(null);
+    setGalleryForm({ title: "", category: "", src: "" });
+    setGalleryPreview("");
+    setIsGalleryModalOpen(true);
+  };
+
+  const openEditGalleryItem = (item) => {
+    setEditingGalleryItem(item);
+    setGalleryForm({
+      title: item.title || "",
+      category: item.category || "",
+      src: item.src || "",
+    });
+    setGalleryPreview(item.src || "");
+    setIsGalleryModalOpen(true);
+  };
+
+  const handleGalleryFormChange = (field, value) => {
+    setGalleryForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGalleryImageSelect = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageData = reader.result;
+      setGalleryPreview(imageData);
+      setGalleryForm((prev) => ({ ...prev, src: imageData }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveGalleryItem = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingGalleryItem && editingGalleryItem.id) {
+        await setDoc(
+          doc(db, "galleryItems", editingGalleryItem.id),
+          {
+            ...galleryForm,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      } else {
+        await addDoc(collection(db, "galleryItems"), {
+          ...galleryForm,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      setIsGalleryModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert("Unable to save gallery item. Please try again.");
+    }
+  };
+
+  const handleDeleteGalleryItem = async (item) => {
+    try {
+      await deleteDoc(doc(db, "galleryItems", item.id));
+    } catch (error) {
+      console.error(error);
+      alert("Unable to delete gallery item. Please try again.");
     }
   };
 
@@ -329,6 +419,52 @@ function AdminDashboard({
           </div>
         )}
 
+        {isGalleryModalOpen && (
+          <div className="admin-modal-backdrop">
+            <form className="admin-modal" onSubmit={handleSaveGalleryItem}>
+              <div className="admin-modal-header">
+                <h3>{editingGalleryItem ? "Edit Gallery Item" : "Add Gallery Item"}</h3>
+              </div>
+
+              <label>
+                Title
+                <input
+                  value={galleryForm.title}
+                  onChange={(e) => handleGalleryFormChange("title", e.target.value)}
+                  required
+                />
+              </label>
+
+              <label>
+                Category
+                <input
+                  value={galleryForm.category}
+                  onChange={(e) => handleGalleryFormChange("category", e.target.value)}
+                  required
+                />
+              </label>
+
+              <label>
+                Image File
+                <input type="file" accept="image/*" onChange={handleGalleryImageSelect} />
+              </label>
+
+              {galleryPreview && (
+                <div className="admin-gallery-preview">
+                  <img src={galleryPreview} alt="Selected gallery preview" />
+                </div>
+              )}
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsGalleryModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit">Save</button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {deleteConfirmation && (
           <DeleteConfirmationModal
             itemType={deleteConfirmation.type}
@@ -392,6 +528,41 @@ function AdminDashboard({
                     Edit
                   </button>
                   <button type="button" className="admin-delete-barber-btn" onClick={() => handleDeleteBarber(barber)}>
+                    Delete
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="admin-panel">
+          <div className="admin-section-header">
+            <div>
+              <span className="admin-eyebrow">Gallery</span>
+              <h2>Homepage Gallery</h2>
+            </div>
+            <div className="admin-section-actions">
+              <button type="button" className="admin-add-barber-btn" onClick={openNewGalleryItem}>
+                <span className="admin-add-icon">+</span>
+                Add Image
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-gallery-grid">
+            {galleryItems.map((item) => (
+              <article className="admin-gallery-card" key={item.id}>
+                <img src={item.src} alt={item.title} />
+                <div className="admin-gallery-info">
+                  <h3>{item.title}</h3>
+                  <p>{item.category}</p>
+                </div>
+                <div className="admin-card-actions">
+                  <button type="button" className="admin-edit-barber-btn" onClick={() => openEditGalleryItem(item)}>
+                    Edit
+                  </button>
+                  <button type="button" className="admin-delete-barber-btn" onClick={() => handleDeleteGalleryItem(item)}>
                     Delete
                   </button>
                 </div>
