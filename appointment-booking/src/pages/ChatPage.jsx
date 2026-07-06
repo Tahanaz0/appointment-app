@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import "./ChatPage.css";
+import Navbar from "../components/Navbar";
 
 function ChatPage() {
   const navigate = useNavigate();
@@ -105,34 +106,11 @@ function ChatPage() {
 
   return (
     <div className="chat-page">
-      <div className="home-header">
-        <div className="header-left">
-          <h1 className="brand-title">GentleCuts</h1>
-          <p className="header-time">Available 9:00 AM - 9:00 PM</p>
-        </div>
-
-        <div className="bottom-nav">
-          <button className="nav-btn" onClick={() => navigate("/home")}>
-            Home
-          </button>
-
-          <button className="nav-btn" onClick={() => navigate("/book")}>
-            Book
-          </button>
-
-          <button className="nav-btn active" onClick={() => navigate("/chat")}>
-            Chat
-          </button>
-
-          <button className="nav-btn" onClick={() => navigate("/profile")}>
-            Profile
-          </button>
-        </div>
-
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+    <Navbar onLogout={handleLogout} />
+      <header className="chat-header">
+        <h1>💬 Chat with GentleCuts</h1>
+        <p>Get assistance with your appointments and inquiries.</p>
+      </header>
 
       <main className="chat-content">
         <section className="chat-shell">

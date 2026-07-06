@@ -4,6 +4,8 @@ import { sendPasswordResetEmail, signOut, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import "./ProfilePage.css";
+import Navbar from "../components/Navbar";
+import AdminNavbar from "./AdminNavbar";
 
 function ProfilePage({ user, appointments = [], isAdmin = false }) {
   const [profile, setProfile] = useState(null);
@@ -85,18 +87,21 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
           email: profile?.email || user?.email || "",
           updatedAt: new Date(),
         },
-        { merge: true }
+        { merge: true },
       );
 
       if (password) {
-        const emailAddress = profile?.email || user?.email || auth.currentUser?.email;
+        const emailAddress =
+          profile?.email || user?.email || auth.currentUser?.email;
 
         if (!emailAddress) {
           throw new Error("No email address found to send the reset link.");
         }
 
         await sendPasswordResetEmail(auth, emailAddress);
-        setMessage("Password reset link sent to your email. Please check your inbox to choose a new password.");
+        setMessage(
+          "Password reset link sent to your email. Please check your inbox to choose a new password.",
+        );
       } else {
         setMessage("Profile updated successfully.");
       }
@@ -129,45 +134,12 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
 
   return (
     <div className="profile-page">
-      <div className="home-header">
-        <div className="header-left">
-          <h1 className="brand-title">GentleCuts</h1>
-          <p className="header-time">Available 9:00 AM - 9:00 PM</p>
-        </div>
-
-        {!isAdmin ? (
-          <div className="bottom-nav">
-            <button className="nav-btn" onClick={() => navigate("/home")}>
-              Home
-            </button>
-            <button className="nav-btn" onClick={() => navigate("/book")}>
-              Book
-            </button>
-            <button className="nav-btn" onClick={() => navigate("/chat")}>
-              Chat
-            </button>
-            <button className="nav-btn active" onClick={() => navigate("/profile")}>
-              Profile
-            </button>
-          </div>
-        ) : (
-          <div className="bottom-nav">
-            <button className="nav-btn" onClick={() => navigate("/admin/dashboard")}>
-              Dashboard
-            </button>
-            <button className="nav-btn" onClick={() => navigate("/admin/chat")}>
-              Chat
-            </button>
-            <button className="nav-btn active" onClick={() => navigate("/admin/profile")}>
-              Profile
-            </button>
-          </div>
-        )}
-
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+      {isAdmin && <AdminNavbar />}
+      {!isAdmin && <Navbar />}
+      <header className="profile-header">
+        <h1>👤 Profile</h1>
+        <p>Manage your account details and view your recent bookings.</p>
+      </header>
 
       <main className="profile-content">
         {loading ? (
@@ -179,13 +151,19 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
                 {email.charAt(0).toUpperCase()}
               </div>
               <div className="profile-card-details">
-                <span className="profile-eyebrow">{isAdmin ? "Admin account" : "Logged in user"}</span>
+                <span className="profile-eyebrow">
+                  {isAdmin ? "Admin account" : "Logged in user"}
+                </span>
                 <h2>{profile?.fullName || user?.displayName || email}</h2>
                 <p>{email}</p>
                 <p>Member since {memberSince}</p>
               </div>
               {!isEditing && (
-                <button type="button" className="profile-card-edit-btn" onClick={() => setIsEditing(true)}>
+                <button
+                  type="button"
+                  className="profile-card-edit-btn"
+                  onClick={() => setIsEditing(true)}
+                >
                   Edit
                 </button>
               )}
@@ -227,16 +205,29 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
             )}
 
             {isEditing && (
-              <div className="profile-modal-backdrop" onClick={handleCancelEdit}>
-                <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="profile-modal-backdrop"
+                onClick={handleCancelEdit}
+              >
+                <div
+                  className="profile-modal"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="profile-modal-header">
                     <h3>Edit Profile</h3>
-                    <button type="button" className="profile-modal-close" onClick={handleCancelEdit}>
+                    <button
+                      type="button"
+                      className="profile-modal-close"
+                      onClick={handleCancelEdit}
+                    >
                       ×
                     </button>
                   </div>
 
-                  <form className="profile-edit-form" onSubmit={handleSaveProfile}>
+                  <form
+                    className="profile-edit-form"
+                    onSubmit={handleSaveProfile}
+                  >
                     <label>
                       Name
                       <input
@@ -268,14 +259,19 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
                     </label>
 
                     <p className="profile-password-help">
-                      If you enter a new password, a reset link will be sent to your email so you can set it securely.
+                      If you enter a new password, a reset link will be sent to
+                      your email so you can set it securely.
                     </p>
 
                     <div className="profile-edit-actions">
                       <button type="submit" disabled={saving}>
                         {saving ? "Saving..." : "Save"}
                       </button>
-                      <button type="button" className="profile-cancel-btn" onClick={handleCancelEdit}>
+                      <button
+                        type="button"
+                        className="profile-cancel-btn"
+                        onClick={handleCancelEdit}
+                      >
                         Cancel
                       </button>
                     </div>
@@ -300,7 +296,11 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
                     <article key={appointment.id} className="profile-booking">
                       <div>
                         <strong>{appointment.service || "Service"}</strong>
-                        <p>{appointment.barber || appointment.doctor || "Barber not selected"}</p>
+                        <p>
+                          {appointment.barber ||
+                            appointment.doctor ||
+                            "Barber not selected"}
+                        </p>
                       </div>
                       <span>
                         {appointment.date} {appointment.time}

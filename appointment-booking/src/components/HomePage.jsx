@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -13,6 +13,7 @@ import colorImage from "../assets/image/color1.jpg";
 import facialImage from "../assets/image/facial1.jpg";
 import spaImage from "../assets/image/spa.jfif";
 import salonImage from "../assets/image/saloon.png";
+import Navbar from "./Navbar";
 
 const defaultGalleryItems = [
   {
@@ -58,7 +59,6 @@ function HomePage({
   appointments = [],
   barbers = defaultBarbers,
   reviews = [],
-  submitReview,
   user,
 }) {
   const [selectedBarber, setSelectedBarber] = useState(null);
@@ -67,13 +67,6 @@ function HomePage({
   const [showAllGallery, setShowAllGallery] = useState(false);
   const [galleryItems, setGalleryItems] = useState(defaultGalleryItems);
   const hasSeededGalleryRef = useRef(false);
-  const [reviewForm, setReviewForm] = useState({
-    name: user?.displayName || "",
-    rating: 5,
-    text: "",
-  });
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [submittedReviewIds, setSubmittedReviewIds] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -100,7 +93,7 @@ function HomePage({
             defaultGalleryItems.map((item) =>
               addDoc(collection(db, "galleryItems"), {
                 ...item,
-                id: undefined,
+                id: item.id,
               })
             )
           );
@@ -154,19 +147,6 @@ function HomePage({
     ? galleryItems
     : galleryItems.slice(0, 3);
   const visibleBarbers = showAllBarbers ? barbers : barbers.slice(0, 3);
-  const pendingReviewAppointment = useMemo(
-    () =>
-      appointments.find(
-        (appointment) =>
-          appointment.status === "completed" &&
-          appointment.reviewStatus !== "submitted" &&
-          !appointment.reviewSubmitted &&
-          !submittedReviewIds.includes(appointment.id)
-      ),
-    [appointments, submittedReviewIds]
-  );
-  const reviewAppointment = pendingReviewAppointment;
-
   const formatReviewTime = (createdAt) => {
     const reviewDate = createdAt?.toDate?.();
 
@@ -202,34 +182,6 @@ function HomePage({
     }
   };
 
-  const handleReviewSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!reviewAppointment || !submitReview) {
-      return;
-    }
-
-    try {
-      setIsSubmittingReview(true);
-      await submitReview(reviewAppointment, {
-        ...reviewForm,
-        name: reviewForm.name.trim() || reviewAppointment.name || "Customer",
-        text: reviewForm.text.trim(),
-      });
-      setSubmittedReviewIds((prev) => [...prev, reviewAppointment.id]);
-      setReviewForm({
-        name: user?.displayName || "",
-        rating: 5,
-        text: "",
-      });
-    } catch (error) {
-      console.error(error);
-      setReviewError("Unable to submit review. Please try again.");
-    } finally {
-      setIsSubmittingReview(false);
-    }
-  };
-
   if (selectedBarber) {
     return (
       <AppointmentForm
@@ -243,49 +195,7 @@ function HomePage({
 
   return (
     <div className="home-wrapper">
-      {/* 🔝 Top Header */}
-      <div className="home-header">
-        <div className="header-left">
-          <h1 className="brand-title">💈 GentleCuts</h1>
-          <p className="header-time">Available 9:00 AM - 9:00 PM</p>
-        </div>
-
-        <div className="bottom-nav">
-          <button
-            className={`nav-btn ${
-              location.pathname === "/" || location.pathname === "/home" ? "active" : ""
-            }`}
-            onClick={() => navigate("/home")}
-          >
-            🏠 Home
-          </button>
-
-          <button
-            className={`nav-btn ${location.pathname === "/book" ? "active" : ""}`}
-            onClick={() => navigate("/book")}
-          >
-            🔍 Book
-          </button>
-
-          <button
-            className={`nav-btn ${location.pathname === "/chat" ? "active" : ""}`}
-            onClick={() => navigate("/chat")}
-          >
-            💬 Chat
-          </button>
-
-          <button
-            className={`nav-btn ${location.pathname === "/profile" ? "active" : ""}`}
-            onClick={() => navigate("/profile")}
-          >
-            👤 Profile
-          </button>
-        </div>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-
+      <Navbar />
       {/* 🪮 Main Content */}
       <div className="home-content">
         {/* Promo Banner */}
@@ -438,72 +348,6 @@ function HomePage({
         {/* Spacer for bottom nav */}
         <div style={{ height: "80px" }}></div>
       </div>
-
-      {reviewAppointment && (
-        <div className="review-modal-backdrop" role="dialog" aria-modal="true">
-          <form className="review-modal" onSubmit={handleReviewSubmit}>
-            <div className="review-modal-header">
-              <span>Service completed</span>
-              <h3>Rate your visit</h3>
-              <p>
-                {reviewAppointment.service || "Your service"} with{" "}
-                {reviewAppointment.barber ||
-                  reviewAppointment.doctor ||
-                  "GentleCuts"}
-              </p>
-            </div>
-
-            <label>
-              Your name
-              <input
-                type="text"
-                value={reviewForm.name}
-                onChange={(event) =>
-                  setReviewForm({ ...reviewForm, name: event.target.value })
-                }
-                placeholder="Customer name"
-              />
-            </label>
-
-            <label>
-              Rating
-              <select
-                value={reviewForm.rating}
-                onChange={(event) =>
-                  setReviewForm({ ...reviewForm, rating: Number(event.target.value) })
-                }
-              >
-                <option value="5">5 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="2">2 Stars</option>
-                <option value="1">1 Star</option>
-              </select>
-            </label>
-
-            <label>
-              Review
-              <textarea
-                required
-                rows="4"
-                value={reviewForm.text}
-                onChange={(event) =>
-                  setReviewForm({ ...reviewForm, text: event.target.value })
-                }
-                placeholder="Apna experience likhein"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="review-submit-modal-btn"
-              disabled={isSubmittingReview || !reviewForm.text.trim()}
-            >
-              {isSubmittingReview ? "Submitting..." : "Submit Review"}
-            </button>
-          </form>
-        </div>
-      )}
 
     </div>
   );

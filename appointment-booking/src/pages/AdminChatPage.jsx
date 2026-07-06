@@ -13,6 +13,7 @@ import {
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import "./ChatPage.css";
+import AdminNavbar from "./AdminNavbar";
 
 function AdminChatPage() {
   const navigate = useNavigate();
@@ -89,48 +90,7 @@ function AdminChatPage() {
 
   return (
     <div className="chat-page">
-      <div className="admin-header">
-        <div className="header-left">
-          <span className="admin-eyebrow">Admin Panel</span>
-          <h1>GentleCuts Admin Chat</h1>
-          <p className="header-time">Support customer messaging</p>
-        </div>
-
-        <div className="admin-bottom-nav">
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/dashboard" ? "active" : ""}`}
-            onClick={() => navigate("/admin/dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/completed-bookings" ? "active" : ""}`}
-            onClick={() => navigate("/admin/completed-bookings")}
-          >
-            Completed
-          </button>
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/chat" ? "active" : ""}`}
-            onClick={() => navigate("/admin/chat")}
-          >
-            Chat
-          </button>
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/profile" ? "active" : ""}`}
-            onClick={() => navigate("/admin/profile")}
-          >
-            Profile
-          </button>
-        </div>
-
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+      <AdminNavbar onLogout={handleLogout} />
 
       <main className="chat-content">
         <section className="chat-shell">

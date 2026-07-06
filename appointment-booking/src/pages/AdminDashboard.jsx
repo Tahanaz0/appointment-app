@@ -5,6 +5,7 @@ import { doc, serverTimestamp, setDoc, addDoc, collection, deleteDoc, onSnapshot
 import { auth, db } from "../firebase";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import "./AdminDashboard.css";
+import AdminNavbar from "./AdminNavbar";
 
 function AdminDashboard({
   appointments = [],
@@ -272,48 +273,9 @@ function AdminDashboard({
 
   return (
     <div className="admin-page">
-      <header className="admin-header">
-        <div className="header-left">
-          <span className="admin-eyebrow">Admin Panel</span>
-          <h1>GentleCuts Dashboard</h1>
-          <p className="header-time">Manage bookings, barbers, gallery and chat</p>
-        </div>
-
-        <div className="admin-bottom-nav">
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/dashboard" ? "active" : ""}`}
-            onClick={() => navigate("/admin/dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/completed-bookings" ? "active" : ""}`}
-            onClick={() => navigate("/admin/completed-bookings")}
-          >
-            Completed
-          </button>
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/chat" ? "active" : ""}`}
-            onClick={() => navigate("/admin/chat")}
-          >
-            Chat
-          </button>
-          <button
-            type="button"
-            className={`admin-nav-btn ${location.pathname === "/admin/profile" ? "active" : ""}`}
-            onClick={() => navigate("/admin/profile")}
-          >
-            Profile
-          </button>
-        </div>
-
-        <button type="button" className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </header>
+      
+      <AdminNavbar />
+  
 
       <main className="admin-content">
         <section className="admin-stats">

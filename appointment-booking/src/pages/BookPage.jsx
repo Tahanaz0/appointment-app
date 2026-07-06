@@ -3,6 +3,7 @@ import { signOut } from "firebase/auth";
 import AppointmentList from "../components/AppointmentList";
 import { auth } from "../firebase";
 import "./BookPage.css";
+import Navbar from "../components/Navbar";
 
 function BookPage({ appointments, deleteAppointment }) {
   const navigate = useNavigate();
@@ -18,34 +19,7 @@ function BookPage({ appointments, deleteAppointment }) {
 
   return (
     <div className="book-page">
-      <div className="home-header">
-        <div className="header-left">
-          <h1 className="brand-title">GentleCuts</h1>
-          <p className="header-time">Available 9:00 AM - 9:00 PM</p>
-        </div>
-
-        <div className="bottom-nav">
-          <button className="nav-btn" onClick={() => navigate("/home")}>
-            Home
-          </button>
-
-          <button className="nav-btn active" onClick={() => navigate("/book")}>
-            Book
-          </button>
-
-          <button className="nav-btn" onClick={() => navigate("/chat")}>
-            Chat
-          </button>
-
-          <button className="nav-btn" onClick={() => navigate("/profile")}>
-            Profile
-          </button>
-        </div>
-
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+      <Navbar onLogout={handleLogout} />
 
       <div className="book-content">
         <section className="booking-list-panel">

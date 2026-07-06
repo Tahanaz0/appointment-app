@@ -28,11 +28,14 @@ import SpecialistPage from "./pages/SpecialistPage";
 import AdminChatPage from "./pages/AdminChatPage";
 import AdminCompletedBookings from "./pages/AdminCompletedBookings";
 import defaultBarbers from "./components/data/barbers";
+import UserReviewPrompt from "./components/UserReviewPrompt";
 
 const createSlotId = (date, time) =>
   `${date}_${time}`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
 
 function App() {
+
+
   const [appointments, setAppointments] = useState([]);
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -49,13 +52,13 @@ function App() {
 
       return firestoreBarber
         ? {
-            ...barber,
-            ...firestoreBarber,
-            available:
-              firestoreBarber.available === undefined
-                ? barber.available
-                : firestoreBarber.available,
-          }
+          ...barber,
+          ...firestoreBarber,
+          available:
+            firestoreBarber.available === undefined
+              ? barber.available
+              : firestoreBarber.available,
+        }
         : barber;
     }),
     ...firestoreBarbers.filter(
@@ -77,8 +80,12 @@ function App() {
 
       try {
         const profileSnap = await getDoc(doc(db, "users", currentUser.uid));
-        const role = profileSnap.exists() ? profileSnap.data().role : "user";
-        setUserRole(role);
+
+        const role = profileSnap.exists()
+        ? profileSnap.data().role || "user"
+        : "user";
+      
+      setUserRole(role);
       } catch (error) {
         console.error("Error loading user role:", error);
         setUserRole("user");
@@ -97,26 +104,72 @@ function App() {
     }
 
     const appointmentsRef = collection(db, "appointments");
-    const q =
-      userRole === "admin"
-        ? query(appointmentsRef)
-        : query(appointmentsRef, where("userId", "==", user.uid));
+    const mapDocs = (snapshot) =>
+      snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data(),
+      }));
 
-    const unsubscribe = onSnapshot(
-      q,
+    if (userRole === "admin") {
+      const unsubscribe = onSnapshot(
+        query(appointmentsRef),
+        (snapshot) => setAppointments(mapDocs(snapshot)),
+        (error) => console.error("Error fetching appointments:", error)
+      );
+
+      return () => unsubscribe();
+    }
+
+    const byUserId = { current: [] };
+    const byUserEmail = { current: [] };
+    const byEmail = { current: [] };
+
+    const syncAppointments = () => {
+      const merged = new Map();
+      [...byUserId.current, ...byUserEmail.current, ...byEmail.current].forEach(
+        (appointment) => {
+          merged.set(appointment.id, appointment);
+        }
+      );
+      setAppointments(Array.from(merged.values()));
+    };
+
+    const unsubscribeUserId = onSnapshot(
+      query(appointmentsRef, where("userId", "==", user.uid)),
       (snapshot) => {
-        const appointmentList = [];
-        snapshot.forEach((doc) => {
-          appointmentList.push({ id: doc.id, ...doc.data() });
-        });
-        setAppointments(appointmentList);
+        byUserId.current = mapDocs(snapshot);
+        syncAppointments();
       },
-      (error) => {
-        console.error("Error fetching appointments:", error);
-      }
+      (error) => console.error("Error fetching appointments by userId:", error)
     );
 
-    return () => unsubscribe();
+    const unsubscribeUserEmail = user.email
+      ? onSnapshot(
+        query(appointmentsRef, where("userEmail", "==", user.email)),
+        (snapshot) => {
+          byUserEmail.current = mapDocs(snapshot);
+          syncAppointments();
+        },
+        (error) => console.error("Error fetching appointments by userEmail:", error)
+      )
+      : () => { };
+
+    const unsubscribeEmail = user.email
+      ? onSnapshot(
+        query(appointmentsRef, where("email", "==", user.email)),
+        (snapshot) => {
+          byEmail.current = mapDocs(snapshot);
+          syncAppointments();
+        },
+        (error) => console.error("Error fetching appointments by email:", error)
+      )
+      : () => { };
+
+    return () => {
+      unsubscribeUserId();
+      unsubscribeUserEmail();
+      unsubscribeEmail();
+    };
   }, [user, userRole]);
 
   useEffect(() => {
@@ -192,6 +245,7 @@ function App() {
       completedAt: serverTimestamp(),
       reviewStatus: "pending",
       reviewSubmitted: false,
+      reviewPending: true,
     });
   };
 
@@ -214,6 +268,7 @@ function App() {
     await updateDoc(appointmentRef, {
       reviewSubmitted: true,
       reviewStatus: "submitted",
+      reviewPending: false,
       reviewedAt: serverTimestamp(),
     });
   };
@@ -221,7 +276,20 @@ function App() {
   if (loading) {
     return <div>Loading...</div>;
   }
-
+  {
+    user && userRole === "user" && (
+      <>
+        {console.log("Rendering UserReviewPrompt")}
+        <UserReviewPrompt
+          submitReview={submitReview}
+          user={user}
+          userRole={userRole}
+        />
+      </>
+    )
+  }
+  console.log("User:", user);
+  console.log("Role:", userRole);
   return (
     <Router>
       <Routes>
@@ -267,7 +335,6 @@ function App() {
                   addAppointment={addAppointment}
                   barbers={barbers}
                   reviews={reviews}
-                  submitReview={submitReview}
                   user={user}
                 />
               </div>
@@ -361,12 +428,12 @@ function App() {
           path="/admin/dashboard"
           element={
             user && userRole === "admin" ? (
-                <AdminDashboard
-                  appointments={appointments}
-                  deleteAppointment={deleteAppointment}
-                  barbers={barbers}
-                  completeAppointment={completeAppointment}
-                />
+              <AdminDashboard
+                appointments={appointments}
+                deleteAppointment={deleteAppointment}
+                barbers={barbers}
+                completeAppointment={completeAppointment}
+              />
             ) : user ? (
               <Navigate to="/home" replace />
             ) : (
@@ -403,6 +470,13 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
+      {user && userRole === "user" && (
+        <UserReviewPrompt
+          submitReview={submitReview}
+          user={user}
+          userRole={userRole}
+        />
+      )}
     </Router>
 
   );
