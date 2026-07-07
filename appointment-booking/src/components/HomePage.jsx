@@ -282,7 +282,7 @@ function HomePage({
         </div>
 
         {/* Gallery */}
-        <div className="gallery-section">
+        {/* <div className="gallery-section">
           <div className="section-header">
             <h3 className="section-title">Gallery</h3>
             <button
@@ -304,7 +304,7 @@ function HomePage({
               </article>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Reviews */}
         <div className="reviews-section">

@@ -18,7 +18,6 @@ function AdminDashboard({
   const [barberForm, setBarberForm] = useState({
     name: "",
     specialty: "",
-    location: "Main Branch",
     workingHours: "",
     available: true,
     avatar: "",
@@ -42,7 +41,7 @@ function AdminDashboard({
     "Grooming Expert",
   ];
 
-  const locationOptions = ["Main Branch", "Premium Lounge", "VIP Room"];
+
 
   const workingHoursOptions = [
     "9:00 AM - 6:00 PM",
@@ -87,7 +86,6 @@ function AdminDashboard({
     setBarberForm({
       name: "",
       specialty: "",
-      location: "Main Branch",
       workingHours: workingHoursOptions[0],
       available: true,
       avatar: "",
@@ -100,7 +98,6 @@ function AdminDashboard({
     setBarberForm({
       name: barber.name || "",
       specialty: barber.specialty || "",
-      location: barber.location || "Main Branch",
       workingHours: barber.workingHours || workingHoursOptions[0],
       available: barber.available ?? true,
       avatar: barber.avatar || "",
@@ -299,7 +296,7 @@ function AdminDashboard({
           </article>
         </section>
 
-        {/* <div className="admin-booking-tabs">
+        <div className="admin-booking-tabs">
           <button
             type="button"
             className={bookingTab === "all" ? "admin-booking-tab active" : "admin-booking-tab"}
@@ -314,7 +311,7 @@ function AdminDashboard({
           >
             Completed Bookings ({completedBookings.length})
           </button>
-        </div> */}
+        </div>
         {isModalOpen && (
           <div className="admin-modal-backdrop">
             <form className="admin-modal" onSubmit={handleSaveBarber}>
@@ -322,8 +319,8 @@ function AdminDashboard({
                 <h3>{editingBarber ? "Edit Barber" : "Add Barber"}</h3>
               </div>
 
-              <label>
-                Name
+              <label className="admin-modal-label">
+               <h4 className="admin-modal-label-text">Name</h4> 
                 <input
                   value={barberForm.name}
                   onChange={(e) => handleBarberFormChange("name", e.target.value)}
@@ -331,8 +328,8 @@ function AdminDashboard({
                 />
               </label>
 
-              <label>
-                Specialty
+              <label className="admin-modal-label">
+                <h4 className="admin-modal-label-text">Specialty</h4> 
                 <select
                   value={barberForm.specialty}
                   onChange={(e) => handleBarberFormChange("specialty", e.target.value)}
@@ -347,22 +344,9 @@ function AdminDashboard({
                 </select>
               </label>
 
-              <label>
-                Location
-                <select
-                  value={barberForm.location}
-                  onChange={(e) => handleBarberFormChange("location", e.target.value)}
-                >
-                  {locationOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
 
-              <label>
-                Working hours
+              <label className="admin-modal-label">
+                <h4 className="admin-modal-label-text">Working hours</h4> 
                 <select
                   value={barberForm.workingHours}
                   onChange={(e) => handleBarberFormChange("workingHours", e.target.value)}
@@ -376,15 +360,15 @@ function AdminDashboard({
                 </select>
               </label>
 
-              <label>
-                Avatar (single char)
+              <label className="admin-modal-label">
+                <h4 className="admin-modal-label-text">Avatar (single char)</h4> 
                 <input
                   value={barberForm.avatar}
                   onChange={(e) => handleBarberFormChange("avatar", e.target.value)}
                   maxLength={2}
                 />
               </label>
-
+{/* 
               <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <input
                   type="checkbox"
@@ -392,7 +376,7 @@ function AdminDashboard({
                   onChange={(e) => handleBarberFormChange("available", e.target.checked)}
                 />
                 Available
-              </label>
+              </label> */}
 
               <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
                 <button type="button" onClick={() => setIsModalOpen(false)}>
@@ -520,7 +504,7 @@ function AdminDashboard({
             ))}
           </div>
         </section>
-
+{/* 
         <section className="admin-panel">
           <div className="admin-section-header">
             <div>
@@ -554,7 +538,7 @@ function AdminDashboard({
               </article>
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section className="admin-panel">
           <div className="admin-section-header">
