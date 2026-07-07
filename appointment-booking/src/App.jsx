@@ -29,6 +29,7 @@ import AdminChatPage from "./pages/AdminChatPage";
 import AdminCompletedBookings from "./pages/AdminCompletedBookings";
 import defaultBarbers from "./components/data/barbers";
 import UserReviewPrompt from "./components/UserReviewPrompt";
+import { writeBatch } from "firebase/firestore";
 
 const createSlotId = (date, time) =>
   `${date}_${time}`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
@@ -249,11 +250,15 @@ function App() {
     });
   };
 
+  
+
   const submitReview = async (appointment, reviewData) => {
     const appointmentRef = doc(db, "appointments", appointment.id);
     const reviewRef = doc(db, "reviews", appointment.id);
-
-    await setDoc(reviewRef, {
+  
+    const batch = writeBatch(db);
+  
+    batch.set(reviewRef, {
       appointmentId: appointment.id,
       userId: user?.uid || appointment.userId || "",
       userEmail: user?.email || appointment.userEmail || appointment.email || "",
@@ -264,15 +269,22 @@ function App() {
       barber: appointment.barber || appointment.doctor || "",
       createdAt: serverTimestamp(),
     });
-
-    await updateDoc(appointmentRef, {
+  
+    batch.update(appointmentRef, {
       reviewSubmitted: true,
       reviewStatus: "submitted",
       reviewPending: false,
       reviewedAt: serverTimestamp(),
     });
+  
+    await batch.commit();
   };
-
+  const dismissReview = async (appointmentId) => {
+    await updateDoc(doc(db, "appointments", appointmentId), {
+      reviewDismissed: true,
+      reviewStatus: "dismissed",
+    });
+  };
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -473,6 +485,7 @@ function App() {
       {user && userRole === "user" && (
         <UserReviewPrompt
           submitReview={submitReview}
+          dismissReview={dismissReview}
           user={user}
           userRole={userRole}
         />

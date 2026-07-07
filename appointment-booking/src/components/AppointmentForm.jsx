@@ -31,8 +31,8 @@ function AppointmentForm({
     date: "",
     time: "",
     notes: "",
-    doctor: selectedSpecialist?.name || "",
-    doctorId: selectedSpecialist?.id || "",
+    // doctor: selectedSpecialist?.name || "",
+    // doctorId: selectedSpecialist?.id || "",
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
@@ -113,8 +113,8 @@ function AppointmentForm({
         date: "",
         time: "",
         notes: "",
-        doctor: selectedSpecialist?.name || "",
-        doctorId: selectedSpecialist?.id || "",
+        // doctor: selectedSpecialist?.name || "",
+        // doctorId: selectedSpecialist?.id || "",
       });
 
     } catch (error) {

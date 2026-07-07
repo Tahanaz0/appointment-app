@@ -30,11 +30,12 @@ function needsReview(appointment) {
   return (
     appointment.status === "completed" &&
     appointment.reviewSubmitted !== true &&
-    appointment.reviewStatus !== "submitted"
+    appointment.reviewStatus !== "submitted" &&
+    appointment.reviewDismissed !== true
   );
 }
 
-function UserReviewPrompt({ submitReview, user, userRole }) {
+function UserReviewPrompt({ submitReview, dismissReview, user, userRole })  {
   const [appointmentsByUserId, setAppointmentsByUserId] = useState([]);
   const [appointmentsByUserEmail, setAppointmentsByUserEmail] = useState([]);
   const [appointmentsByEmail, setAppointmentsByEmail] = useState([]);
@@ -110,7 +111,8 @@ function UserReviewPrompt({ submitReview, user, userRole }) {
         const bTime = b.completedAt?.toMillis?.() || 0;
         return bTime - aTime;
       });
-
+  
+    console.log("Pending review appointments:", pending); // ye line add karo
     return pending[0] || null;
   }, [userAppointments, submittedIds]);
 
@@ -134,23 +136,29 @@ function UserReviewPrompt({ submitReview, user, userRole }) {
     };
   }, [shouldShowModal]);
 
-  const handleDismiss = () => {
+  const handleDismiss = async () => {
     setDismissedForThisVisit(true);
+  
+    if (pendingReviewAppointment && dismissReview) {
+      try {
+        console.log("Dismissing appointment:", pendingReviewAppointment.id);
+        await dismissReview(pendingReviewAppointment.id);
+        console.log("Dismiss successful");
+      } catch (error) {
+        console.error("Dismiss FAILED:", error);
+      }
+    } else {
+      console.log("dismissReview missing or no pendingReviewAppointment", { pendingReviewAppointment, dismissReview });
+    }
   };
-
   const handleSubmit = async (appointment, reviewData) => {
     if (!submitReview) return;
   
     try {
       setIsSubmitting(true);
-  
       await submitReview(appointment, reviewData);
-  
       setSubmittedIds((prev) => [...prev, appointment.id]);
-  
-      // Modal turant close
       setDismissedForThisVisit(true);
-  
     } catch (error) {
       console.error(error);
     } finally {
