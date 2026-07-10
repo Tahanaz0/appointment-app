@@ -32,7 +32,7 @@ body {
 }
 
 
-.form {
+/* .form {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -45,7 +45,7 @@ body {
   border-radius: 12px;
   font-size: 15px;
   transition: 0.3s;
-}
+} */
 
 .form input:focus,
 .form select:focus {
@@ -54,7 +54,7 @@ body {
   box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
 }
 
-.form button {
+/* .form button {
   padding: 14px;
   border: none;
   border-radius: 12px;
@@ -63,16 +63,16 @@ body {
   font-size: 16px;
   cursor: pointer;
   transition: 0.3s;
-}
+} */
 
-.form button:hover {
+/* .form button:hover {
   background: #4f46e5;
   transform: translateY(-2px);
 }
 
 .form button:active {
   transform: scale(0.98);
-}
+} */
 
 
 .list {

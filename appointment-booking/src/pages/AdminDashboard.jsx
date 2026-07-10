@@ -23,7 +23,6 @@ function AdminDashboard({
     avatar: "",
   });
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
-  const [bookingTab, setBookingTab] = useState("all");
   const [galleryItems, setGalleryItems] = useState([]);
   const [galleryForm, setGalleryForm] = useState({ title: "", category: "", src: "" });
   const [galleryPreview, setGalleryPreview] = useState("");
@@ -52,9 +51,6 @@ function AdminDashboard({
   ];
   const today = new Date().toISOString().slice(0, 10);
   const todayBookings = appointments.filter((item) => item.date === today).length;
-  const completedBookings = appointments.filter((item) => item.status === "completed");
-  const activeBookings = appointments.filter((item) => item.status !== "completed");
-  const displayedAppointments = bookingTab === "completed" ? completedBookings : activeBookings;
   const availableBarbers = barbers.filter((barber) => barber.available).length;
   const customers = new Set(
     appointments.map((item) => item.userEmail || item.email).filter(Boolean)
@@ -296,22 +292,7 @@ function AdminDashboard({
           </article>
         </section>
 
-        <div className="admin-booking-tabs">
-          <button
-            type="button"
-            className={bookingTab === "all" ? "admin-booking-tab active" : "admin-booking-tab"}
-            onClick={() => setBookingTab("all")}
-          >
-            All Bookings
-          </button>
-          <button
-            type="button"
-            className={bookingTab === "completed" ? "admin-booking-tab active" : "admin-booking-tab"}
-            onClick={() => setBookingTab("completed")}
-          >
-            Completed Bookings ({completedBookings.length})
-          </button>
-        </div>
+       
         {isModalOpen && (
           <div className="admin-modal-backdrop">
             <form className="admin-modal" onSubmit={handleSaveBarber}>
@@ -540,88 +521,7 @@ function AdminDashboard({
           </div>
         </section> */}
 
-        <section className="admin-panel">
-          <div className="admin-section-header">
-            <div>
-              <span className="admin-eyebrow">Bookings</span>
-              <h2>All Appointments</h2>
-            </div>
-            <span className="admin-count">{appointments.length} Total</span>
-          </div>
-
-          {displayedAppointments.length === 0 ? (
-            <div className="admin-empty">
-              <h3>No bookings found</h3>
-              <p>
-                {bookingTab === "completed"
-                  ? "No completed bookings yet."
-                  : "Customer appointments will appear here once they are booked."}
-              </p>
-            </div>
-          ) : (
-            <div className="admin-bookings">
-              {displayedAppointments.map((item) => (
-                <article className="admin-booking-card" key={item.id}>
-                  <div className="admin-booking-top">
-                    <div className="admin-avatar">
-                      {(item.name || "C").charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3>{item.name || "Customer"}</h3>
-                      <p>{item.userEmail || item.email || "No email"}</p>
-                    </div>
-                    <span className={`admin-status ${item.status === "completed" ? "completed" : ""}`}>
-                      {getStatusLabel(item)}
-                    </span>
-                  </div>
-
-                  <div className="admin-booking-grid">
-                    <div>
-                      <span>Phone</span>
-                      <strong>{item.phone || "N/A"}</strong>
-                    </div>
-                    <div>
-                      <span>Service</span>
-                      <strong>{item.service || "N/A"}</strong>
-                    </div>
-                    <div>
-                      <span>Barber</span>
-                      <strong>{item.barber || item.doctor || "Not selected"}</strong>
-                    </div>
-                    <div>
-                      <span>Date & Time</span>
-                      <strong>
-                        {item.date || "No date"} {item.time ? `at ${item.time}` : ""}
-                      </strong>
-                    </div>
-                  </div>
-
-                  {item.notes && (
-                    <div className="admin-notes">
-                      <span>Notes</span>
-                      <p>{item.notes}</p>
-                    </div>
-                  )}
-
-                  <div className="admin-actions">
-                    {item.status !== "completed" && (
-                      <button
-                        type="button"
-                        className="complete-booking-btn"
-                        onClick={() => handleComplete(item)}
-                      >
-                        Complete
-                      </button>
-                    )}
-                    <button type="button" onClick={() => openDeleteConfirmation("booking", item)}>
-                      Delete Booking
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+     
       </main>
     </div>
   );

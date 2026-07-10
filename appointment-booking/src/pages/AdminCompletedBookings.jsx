@@ -6,13 +6,27 @@ import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import "./AdminDashboard.css";
 import AdminNavbar from "./AdminNavbar";
 
-function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
+function AdminCompletedBookings({
+  appointments = [],
+  deleteAppointment,
+  completeAppointment,
+}) {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [bookingTab, setBookingTab] = useState("all");
 
-  const completedBookings = appointments.filter((item) => item.status === "completed");
+  const completedBookings = appointments.filter(
+    (item) => item.status === "completed",
+  );
+  const pendingBookings = appointments.filter(
+    (item) => item.status !== "completed",
+  );
+
+  const displayedAppointments =
+    bookingTab === "completed" ? completedBookings : pendingBookings;
   const completedCount = completedBookings.length;
+  const pendingCount = pendingBookings.length;
 
   const handleLogout = async () => {
     try {
@@ -46,34 +60,68 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
   };
 
   const getStatusLabel = (item) => {
-    return item.reviewSubmitted ? "Reviewed" : "Completed";
+    if (item.status === "completed") {
+      return item.reviewSubmitted ? "Reviewed" : "Completed";
+    }
+
+    return "Booked";
   };
 
   return (
     <div className="admin-page">
       <AdminNavbar />
-      
 
       <main className="admin-content">
         <section className="admin-stats">
           <article>
-            <span>Total Completed</span>
-            <strong>{completedCount}</strong>
+            <span>Total Bookings</span>
+            <strong>{appointments.length}</strong>
           </article>
+
+          <article>
+            <span>Pending Bookings</span>
+            <strong>{pendingCount}</strong>
+          </article>
+
           <article>
             <span>Completed Bookings</span>
             <strong>{completedCount}</strong>
           </article>
         </section>
+        <div className="admin-booking-tabs">
+          <button
+            className={
+              bookingTab === "all"
+                ? "admin-booking-tab active"
+                : "admin-booking-tab"
+            }
+            onClick={() => setBookingTab("all")}
+          >
+            Pending Bookings ({pendingCount})
+          </button>
+          <button
+            className={
+              bookingTab === "completed"
+                ? "admin-booking-tab active"
+                : "admin-booking-tab"
+            }
+            onClick={() => setBookingTab("completed")}
+          >
+            Completed Bookings ({completedBookings.length})
+          </button>
+        </div>
 
-        {completedBookings.length === 0 ? (
+        {displayedAppointments.length === 0 ? (
           <div className="admin-empty">
             <h3>No completed bookings yet</h3>
-            <p>Completed appointments will appear here after you mark them as completed.</p>
+            <p>
+              Completed appointments will appear here after you mark them as
+              completed.
+            </p>
           </div>
         ) : (
           <div className="admin-bookings">
-            {completedBookings.map((item) => (
+            {displayedAppointments.map((item) => (
               <article className="admin-booking-card" key={item.id}>
                 <div className="admin-booking-top">
                   <div className="admin-avatar">
@@ -83,7 +131,13 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
                     <h3>{item.name || "Customer"}</h3>
                     <p>{item.userEmail || item.email || "No email"}</p>
                   </div>
-                  <span className="admin-status completed">{getStatusLabel(item)}</span>
+                  <span
+                    className={`admin-status ${
+                      item.status === "completed" ? "completed" : ""
+                    }`}
+                  >
+                    {getStatusLabel(item)}
+                  </span>
                 </div>
 
                 <div className="admin-booking-grid">
@@ -97,12 +151,15 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
                   </div>
                   <div>
                     <span>Barber</span>
-                    <strong>{item.barber || item.doctor || "Not selected"}</strong>
+                    <strong>
+                      {item.barber || item.doctor || "Not selected"}
+                    </strong>
                   </div>
                   <div>
                     <span>Date & Time</span>
                     <strong>
-                      {item.date || "No date"} {item.time ? `at ${item.time}` : ""}
+                      {item.date || "No date"}{" "}
+                      {item.time ? `at ${item.time}` : ""}
                     </strong>
                   </div>
                 </div>
@@ -113,9 +170,28 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
                     <p>{item.notes}</p>
                   </div>
                 )}
-
+                {/* {item.status !== "completed" && (
+                  <button
+                    className="complete-booking-btn"
+                    onClick={() => completeAppointment(item.id)}
+                  >
+                    Complete
+                  </button>
+                )} */}
                 <div className="admin-actions">
-                  <button type="button" onClick={() => openDeleteConfirmation(item)}>
+                  {item.status !== "completed" && (
+                    <button
+                      className="complete-booking-btn"
+                      onClick={() => completeAppointment(item.id)}
+                    >
+                      Complete
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => openDeleteConfirmation(item)}
+                  >
                     Delete Booking
                   </button>
                 </div>
@@ -127,7 +203,9 @@ function AdminCompletedBookings({ appointments = [], deleteAppointment }) {
         {deleteConfirmation && (
           <DeleteConfirmationModal
             itemType={deleteConfirmation.type}
-            itemName={deleteConfirmation.item.name || deleteConfirmation.item.id}
+            itemName={
+              deleteConfirmation.item.name || deleteConfirmation.item.id
+            }
             onCancel={handleCancelDelete}
             onConfirm={handleConfirmDelete}
           />

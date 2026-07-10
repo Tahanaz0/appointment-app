@@ -107,10 +107,10 @@ function ChatPage() {
   return (
     <div className="chat-page">
     <Navbar onLogout={handleLogout} />
-      <header className="chat-header">
+      {/* <header className="chat-header">
         <h1>💬 Chat with GentleCuts</h1>
         <p>Get assistance with your appointments and inquiries.</p>
-      </header>
+      </header> */}
 
       <main className="chat-content">
         <section className="chat-shell">

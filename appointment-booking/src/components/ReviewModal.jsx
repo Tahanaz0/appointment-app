@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./ReviewModal.css";
-
+import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 function ReviewModal({ appointment, user, onSubmit, onClose, isSubmitting }) {
   const [reviewForm, setReviewForm] = useState({
     name: user?.displayName || appointment?.name || "",
@@ -23,7 +23,7 @@ function ReviewModal({ appointment, user, onSubmit, onClose, isSubmitting }) {
         name: reviewForm.name.trim() || appointment.name || "Customer",
         text: reviewForm.text.trim(),
       });
-      
+
       onClose();
     } catch (submitError) {
       console.error(submitError);
@@ -75,18 +75,42 @@ function ReviewModal({ appointment, user, onSubmit, onClose, isSubmitting }) {
 
         <label>
           Rating
-          <select
-            value={reviewForm.rating}
-            onChange={(event) =>
-              setReviewForm({ ...reviewForm, rating: Number(event.target.value) })
-            }
-          >
-            <option value="5">5 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="2">2 Stars</option>
-            <option value="1">1 Star</option>
-          </select>
+          <div className="star-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <div key={star} className="star-wrapper">
+                {/* Left Half */}
+                <span
+                  className="half-star left"
+                  onClick={() =>
+                    setReviewForm({
+                      ...reviewForm,
+                      rating: star - 0.5,
+                    })
+                  }
+                />
+
+                {/* Right Half */}
+                <span
+                  className="half-star right"
+                  onClick={() =>
+                    setReviewForm({
+                      ...reviewForm,
+                      rating: star,
+                    })
+                  }
+                />
+
+                {reviewForm.rating >= star ? (
+                  <FaStar className="star filled" />
+                ) : reviewForm.rating >= star - 0.5 ? (
+                  <FaStarHalfAlt className="star filled" />
+                ) : (
+                  <FaRegStar className="star" />
+                )}
+              </div>
+            ))}
+          </div>
+          <span className="rating-value">{reviewForm.rating} / 5</span>
         </label>
 
         <label>
@@ -112,7 +136,11 @@ function ReviewModal({ appointment, user, onSubmit, onClose, isSubmitting }) {
           >
             {isSubmitting ? "Submitting..." : "Submit Review"}
           </button>
-          <button type="button" className="review-dismiss-btn" onClick={onClose}>
+          <button
+            type="button"
+            className="review-dismiss-btn"
+            onClick={onClose}
+          >
             Maybe later
           </button>
         </div>

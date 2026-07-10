@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import "./App.css";
 import {
   collection,
@@ -35,8 +40,6 @@ const createSlotId = (date, time) =>
   `${date}_${time}`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
 
 function App() {
-
-
   const [appointments, setAppointments] = useState([]);
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -48,22 +51,23 @@ function App() {
   const barbers = [
     ...defaultBarbers.map((barber) => {
       const firestoreBarber = firestoreBarbers.find(
-        (item) => String(item.id) === String(barber.id)
+        (item) => String(item.id) === String(barber.id),
       );
 
       return firestoreBarber
         ? {
-          ...barber,
-          ...firestoreBarber,
-          available:
-            firestoreBarber.available === undefined
-              ? barber.available
-              : firestoreBarber.available,
-        }
+            ...barber,
+            ...firestoreBarber,
+            available:
+              firestoreBarber.available === undefined
+                ? barber.available
+                : firestoreBarber.available,
+          }
         : barber;
     }),
     ...firestoreBarbers.filter(
-      (item) => !defaultBarbers.some((barber) => String(barber.id) === String(item.id))
+      (item) =>
+        !defaultBarbers.some((barber) => String(barber.id) === String(item.id)),
     ),
   ];
 
@@ -83,10 +87,10 @@ function App() {
         const profileSnap = await getDoc(doc(db, "users", currentUser.uid));
 
         const role = profileSnap.exists()
-        ? profileSnap.data().role || "user"
-        : "user";
-      
-      setUserRole(role);
+          ? profileSnap.data().role || "user"
+          : "user";
+
+        setUserRole(role);
       } catch (error) {
         console.error("Error loading user role:", error);
         setUserRole("user");
@@ -115,7 +119,7 @@ function App() {
       const unsubscribe = onSnapshot(
         query(appointmentsRef),
         (snapshot) => setAppointments(mapDocs(snapshot)),
-        (error) => console.error("Error fetching appointments:", error)
+        (error) => console.error("Error fetching appointments:", error),
       );
 
       return () => unsubscribe();
@@ -130,7 +134,7 @@ function App() {
       [...byUserId.current, ...byUserEmail.current, ...byEmail.current].forEach(
         (appointment) => {
           merged.set(appointment.id, appointment);
-        }
+        },
       );
       setAppointments(Array.from(merged.values()));
     };
@@ -141,30 +145,32 @@ function App() {
         byUserId.current = mapDocs(snapshot);
         syncAppointments();
       },
-      (error) => console.error("Error fetching appointments by userId:", error)
+      (error) => console.error("Error fetching appointments by userId:", error),
     );
 
     const unsubscribeUserEmail = user.email
       ? onSnapshot(
-        query(appointmentsRef, where("userEmail", "==", user.email)),
-        (snapshot) => {
-          byUserEmail.current = mapDocs(snapshot);
-          syncAppointments();
-        },
-        (error) => console.error("Error fetching appointments by userEmail:", error)
-      )
-      : () => { };
+          query(appointmentsRef, where("userEmail", "==", user.email)),
+          (snapshot) => {
+            byUserEmail.current = mapDocs(snapshot);
+            syncAppointments();
+          },
+          (error) =>
+            console.error("Error fetching appointments by userEmail:", error),
+        )
+      : () => {};
 
     const unsubscribeEmail = user.email
       ? onSnapshot(
-        query(appointmentsRef, where("email", "==", user.email)),
-        (snapshot) => {
-          byEmail.current = mapDocs(snapshot);
-          syncAppointments();
-        },
-        (error) => console.error("Error fetching appointments by email:", error)
-      )
-      : () => { };
+          query(appointmentsRef, where("email", "==", user.email)),
+          (snapshot) => {
+            byEmail.current = mapDocs(snapshot);
+            syncAppointments();
+          },
+          (error) =>
+            console.error("Error fetching appointments by email:", error),
+        )
+      : () => {};
 
     return () => {
       unsubscribeUserId();
@@ -187,7 +193,7 @@ function App() {
       },
       (error) => {
         console.error("Error fetching barbers:", error);
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -213,7 +219,7 @@ function App() {
       },
       (error) => {
         console.error("Error fetching reviews:", error);
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -226,7 +232,9 @@ function App() {
   const deleteAppointment = async (appointmentId) => {
     const appointmentRef = doc(db, "appointments", appointmentId);
     const appointmentSnap = await getDoc(appointmentRef);
-    const appointment = appointmentSnap.exists() ? appointmentSnap.data() : null;
+    const appointment = appointmentSnap.exists()
+      ? appointmentSnap.data()
+      : null;
     const bookingSlotId =
       appointment?.bookingSlotId ||
       (appointment?.date && appointment?.time
@@ -250,18 +258,17 @@ function App() {
     });
   };
 
-  
-
   const submitReview = async (appointment, reviewData) => {
     const appointmentRef = doc(db, "appointments", appointment.id);
     const reviewRef = doc(db, "reviews", appointment.id);
-  
+
     const batch = writeBatch(db);
-  
+
     batch.set(reviewRef, {
       appointmentId: appointment.id,
       userId: user?.uid || appointment.userId || "",
-      userEmail: user?.email || appointment.userEmail || appointment.email || "",
+      userEmail:
+        user?.email || appointment.userEmail || appointment.email || "",
       name: reviewData.name,
       rating: Number(reviewData.rating),
       text: reviewData.text,
@@ -269,14 +276,14 @@ function App() {
       barber: appointment.barber || appointment.doctor || "",
       createdAt: serverTimestamp(),
     });
-  
+
     batch.update(appointmentRef, {
       reviewSubmitted: true,
       reviewStatus: "submitted",
       reviewPending: false,
       reviewedAt: serverTimestamp(),
     });
-  
+
     await batch.commit();
   };
   const dismissReview = async (appointmentId) => {
@@ -298,7 +305,7 @@ function App() {
           userRole={userRole}
         />
       </>
-    )
+    );
   }
   console.log("User:", user);
   console.log("Role:", userRole);
@@ -310,9 +317,11 @@ function App() {
           path="/"
           element={
             !visitedApp && !user ? (
-              <SplashScreen onGetStarted={() => {
-                setVisitedApp(true);
-              }} />
+              <SplashScreen
+                onGetStarted={() => {
+                  setVisitedApp(true);
+                }}
+              />
             ) : user && userRole === "admin" ? (
               <Navigate to="/admin/dashboard" replace />
             ) : user ? (
@@ -328,7 +337,10 @@ function App() {
           path="/login"
           element={
             user ? (
-              <Navigate to={userRole === "admin" ? "/admin/dashboard" : "/home"} replace />
+              <Navigate
+                to={userRole === "admin" ? "/admin/dashboard" : "/home"}
+                replace
+              />
             ) : (
               <LoginPage />
             )
@@ -404,6 +416,7 @@ function App() {
               <AdminCompletedBookings
                 appointments={appointments}
                 deleteAppointment={deleteAppointment}
+                completeAppointment={completeAppointment}
               />
             ) : user ? (
               <Navigate to="/home" replace />
@@ -457,7 +470,10 @@ function App() {
           path="/specialist/:id"
           element={
             user && userRole !== "admin" ? (
-              <SpecialistPage addAppointment={addAppointment} barbers={barbers} />
+              <SpecialistPage
+                addAppointment={addAppointment}
+                barbers={barbers}
+              />
             ) : user ? (
               <Navigate to="/admin/dashboard" replace />
             ) : (
@@ -491,7 +507,6 @@ function App() {
         />
       )}
     </Router>
-
   );
 }
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 function AppointmentList({ appointments, onDelete }) {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
@@ -7,18 +8,15 @@ function AppointmentList({ appointments, onDelete }) {
     if (item.status === "completed") {
       return item.reviewSubmitted ? "Reviewed" : "Review Pending";
     }
-
     return "Booked";
   };
 
-  const handleDelete = async (appointmentId) => {
+  const handleDelete = (appointmentId) => {
     setPendingDeleteId(appointmentId);
   };
 
   const confirmDelete = async () => {
-    if (!pendingDeleteId) {
-      return;
-    }
+    if (!pendingDeleteId) return;
 
     try {
       await onDelete(pendingDeleteId);
@@ -32,21 +30,13 @@ function AppointmentList({ appointments, onDelete }) {
   return (
     <div className="list">
       {pendingDeleteId && (
-        <div className="delete-confirmation-modal">
-          <div className="delete-confirmation-card">
-            <h3>Delete booking?</h3>
-            <p>This action cannot be undone.</p>
-            <div className="delete-actions">
-              <button type="button" className="cancel-delete-btn" onClick={() => setPendingDeleteId(null)}>
-                Cancel
-              </button>
-              <button type="button" className="confirm-delete-btn" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmationModal
+          itemType="booking"
+          onCancel={() => setPendingDeleteId(null)}
+          onConfirm={confirmDelete}
+        />
       )}
+
       <div className="booking-list-header">
         <div>
           <span className="booking-eyebrow">Appointments</span>

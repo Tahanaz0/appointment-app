@@ -1,24 +1,78 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { useEffect, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { auth, db } from "../firebase";
 import "./Navbar.css";
+
+import {
+  FaHome,
+  FaCalendarAlt,
+  FaComments,
+  FaUserCircle,
+  FaSignOutAlt,
+  FaCut,
+} from "react-icons/fa";
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [openingTime, setOpeningTime] = useState("09:00");
+  const [closingTime, setClosingTime] = useState("21:00");
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, "settings", "salon"),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+
+          setOpeningTime(data.openingTime || "09:00");
+          setClosingTime(data.closingTime || "21:00");
+        }
+      },
+      (error) => {
+        console.error("Error loading salon timing:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/login");
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <div className="home-header">
+    <header className="home-header">
+      {/* Brand */}
       <div className="header-left">
-        <h1 className="brand-title">💈 GentleCuts</h1>
-        <p className="header-time">Available 9:00 AM - 9:00 PM</p>
+        <div className="header-brand">
+          <div className="logo-box">
+            <FaCut />
+          </div>
+
+          <div>
+            <span className="brand-tag">Premium Men's Salon</span>
+
+            <h1 className="brand-title">
+              Gentle<span>Cuts</span>
+            </h1>
+
+            <p className="header-time">
+              Available {openingTime} - {closingTime}
+            </p>
+          </div>
+        </div>
       </div>
 
+      {/* Navigation */}
       <div className="bottom-nav">
         <button
           className={`nav-btn ${
@@ -28,35 +82,47 @@ function Navbar() {
           }`}
           onClick={() => navigate("/home")}
         >
-          🏠 Home
+          <FaHome />
+          <span>Home</span>
         </button>
 
         <button
-          className={`nav-btn ${location.pathname === "/book" ? "active" : ""}`}
+          className={`nav-btn ${
+            location.pathname === "/book" ? "active" : ""
+          }`}
           onClick={() => navigate("/book")}
         >
-          📅 Book
+          <FaCalendarAlt />
+          <span>Book</span>
         </button>
 
         <button
-          className={`nav-btn ${location.pathname === "/chat" ? "active" : ""}`}
+          className={`nav-btn ${
+            location.pathname === "/chat" ? "active" : ""
+          }`}
           onClick={() => navigate("/chat")}
         >
-          💬 Chat
+          <FaComments />
+          <span>Chat</span>
         </button>
 
         <button
-          className={`nav-btn ${location.pathname === "/profile" ? "active" : ""}`}
+          className={`nav-btn ${
+            location.pathname === "/profile" ? "active" : ""
+          }`}
           onClick={() => navigate("/profile")}
         >
-          👤 Profile
+          <FaUserCircle />
+          <span>Profile</span>
         </button>
       </div>
 
+      {/* Logout */}
       <button className="logout-btn" onClick={handleLogout}>
-        Logout
+        <FaSignOutAlt />
+        <span>Logout</span>
       </button>
-    </div>
+    </header>
   );
 }
 

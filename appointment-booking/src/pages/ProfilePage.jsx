@@ -6,7 +6,7 @@ import { auth, db } from "../firebase";
 import "./ProfilePage.css";
 import Navbar from "../components/Navbar";
 import AdminNavbar from "./AdminNavbar";
-
+import { FaClock } from "react-icons/fa";
 function ProfilePage({ user, appointments = [], isAdmin = false }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,6 +17,9 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [openingTime, setOpeningTime] = useState("09:00");
+  const [closingTime, setClosingTime] = useState("21:00");
+  const [savingTiming, setSavingTiming] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,13 +30,23 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
       }
 
       try {
+        // User profile
         const profileSnap = await getDoc(doc(db, "users", user.uid));
         const profileData = profileSnap.exists() ? profileSnap.data() : null;
+
         setProfile(profileData);
         setDisplayName(profileData?.fullName || user?.displayName || "");
+
+        // ✅ Salon settings
+        const settingsSnap = await getDoc(doc(db, "settings", "salon"));
+
+        if (settingsSnap.exists()) {
+          setOpeningTime(settingsSnap.data().openingTime || "09:00");
+          setClosingTime(settingsSnap.data().closingTime || "21:00");
+        }
       } catch (err) {
         console.error(err);
-        setError("Unable to load profile data. Please try again.");
+        setError("Unable to load profile data.");
       } finally {
         setLoading(false);
       }
@@ -126,6 +139,27 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
     setError("");
     setMessage("");
   };
+  const handleSaveTiming = async () => {
+    try {
+      setSavingTiming(true);
+
+      await setDoc(
+        doc(db, "settings", "salon"),
+        {
+          openingTime,
+          closingTime,
+        },
+        { merge: true },
+      );
+
+      setMessage("Salon timing updated successfully.");
+    } catch (err) {
+      console.error(err);
+      setError("Unable to update salon timing.");
+    } finally {
+      setSavingTiming(false);
+    }
+  };
 
   const email = profile?.email || user?.email || "No email";
   const memberSince = profile?.createdAt?.toDate
@@ -136,10 +170,10 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
     <div className="profile-page">
       {isAdmin && <AdminNavbar />}
       {!isAdmin && <Navbar />}
-      <header className="profile-header">
+      {/* <header className="profile-header">
         <h1>👤 Profile</h1>
         <p>Manage your account details and view your recent bookings.</p>
-      </header>
+      </header> */}
 
       <main className="profile-content">
         {loading ? (
@@ -188,20 +222,71 @@ function ProfilePage({ user, appointments = [], isAdmin = false }) {
             </section>
 
             {isAdmin && (
-              <section className="profile-panel profile-admin-overview">
-                <div className="profile-section-header">
-                  <div>
-                    <span className="profile-eyebrow">Admin overview</span>
-                    <h3>Access & permissions</h3>
+              <>
+                <section className="profile-panel profile-admin-overview">
+                  <div className="profile-section-header">
+                    <div>
+                      <span className="profile-eyebrow">Admin overview</span>
+                      <h3>Access & permissions</h3>
+                    </div>
                   </div>
-                </div>
-                <div className="profile-admin-pill-group">
-                  <span className="profile-admin-pill">Manage bookings</span>
-                  <span className="profile-admin-pill">Control barbers</span>
-                  <span className="profile-admin-pill">Update gallery</span>
-                  <span className="profile-admin-pill">Chat with clients</span>
-                </div>
-              </section>
+                  <div className="profile-admin-pill-group">
+                    <span className="profile-admin-pill">Manage bookings</span>
+                    <span className="profile-admin-pill">Control barbers</span>
+                    <span className="profile-admin-pill">Update gallery</span>
+                    <span className="profile-admin-pill">
+                      Chat with clients
+                    </span>
+                  </div>
+                </section>
+                <section className="profile-panel">
+                  <div className="profile-section-header">
+                    <div>
+                      <span className="profile-eyebrow">Salon Settings</span>
+                      <h3>Opening Hours</h3>
+                    </div>
+                  </div>
+
+                  <div className="timing-grid">
+                    <div>
+                      <label>Opening Time</label>
+
+                      <div className="time-input">
+                       
+
+                        <input
+                          type="time"
+                          value={openingTime}
+                          onChange={(e) => setOpeningTime(e.target.value)}
+                        />
+                         <FaClock className="time-icon" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label>Closing Time</label>
+
+                      <div className="time-input">
+                        <FaClock className="time-icon" />
+
+                        <input
+                          type="time"
+                          value={closingTime}
+                          onChange={(e) => setClosingTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    className="save-timing-btn"
+                    onClick={handleSaveTiming}
+                    disabled={savingTiming}
+                  >
+                    {savingTiming ? "Saving..." : "Save Timing"}
+                  </button>
+                </section>
+              </>
             )}
 
             {isEditing && (

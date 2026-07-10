@@ -223,8 +223,8 @@ function ServicePage({ addAppointment, barbers = [] }) {
         ))}
       </div>
 
-      <div className="review-card">
-        <div className="review-header">
+      {/* <div className="review-card"> */}
+        {/* <div className="review-header">
           <h2>Customer Reviews</h2>
           <button
             type="button"
@@ -233,9 +233,9 @@ function ServicePage({ addAppointment, barbers = [] }) {
           >
             {showAllReviews ? "Show Less" : "View All"}
           </button>
-        </div>
+        </div> */}
 
-        <form className="review-form" onSubmit={handleReviewSubmit}>
+        {/* <form className="review-form" onSubmit={handleReviewSubmit}>
           <input
             type="text"
             placeholder="Your name"
@@ -266,9 +266,9 @@ function ServicePage({ addAppointment, barbers = [] }) {
           <button type="submit" className="review-submit-btn">
             Submit Review
           </button>
-        </form>
+        </form> */}
 
-        <div className="review-list">
+        {/* <div className="review-list">
           {(showAllReviews ? reviews : reviews.slice(0, 2)).map((review, index) => (
             <div className="review-item" key={index}>
               <div className="review-top">
@@ -278,8 +278,8 @@ function ServicePage({ addAppointment, barbers = [] }) {
               <p>{review.comment}</p>
             </div>
           ))}
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
 
       <button
         type="button"

@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { collection, doc, runTransaction, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  runTransaction,
+  serverTimestamp,
+} from "firebase/firestore";
 import { auth, db } from "../firebase";
 import "./AppointmentForm.css";
+import Select from "react-select";
 
 const createSlotId = (date, time) =>
   `${date}_${time}`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
@@ -22,6 +28,32 @@ function AppointmentForm({
       ? [selectedSpecialist]
       : [];
 
+  const barberSelectOptions = barberOptions.map((barber) => ({
+    value: barber.name,
+    label: barber.available ? barber.name : `${barber.name} (Unavailable)`,
+    id: barber.id,
+    isDisabled: barber.available === false,
+  }));
+
+  const serviceOptions = [
+    { value: "Haircut", label: "✂️ Haircut" },
+    { value: "Beard Trim", label: "🧔 Beard Trim" },
+    { value: "Hair Color", label: "🎨 Hair Color" },
+    { value: "Facial", label: "💆 Facial" },
+  ];
+
+  const timeOptions = [
+    { value: "09:00 AM", label: "09:00 AM" },
+    { value: "10:00 AM", label: "10:00 AM" },
+    { value: "11:00 AM", label: "11:00 AM" },
+    { value: "12:00 PM", label: "12:00 PM" },
+    { value: "01:00 PM", label: "01:00 PM" },
+    { value: "02:00 PM", label: "02:00 PM" },
+    { value: "03:00 PM", label: "03:00 PM" },
+    { value: "04:00 PM", label: "04:00 PM" },
+    { value: "05:00 PM", label: "05:00 PM" },
+    { value: "06:00 PM", label: "06:00 PM" },
+  ];
   const [formData, setFormData] = useState({
     name: "",
     email: currentUser?.email || "",
@@ -37,21 +69,24 @@ function AppointmentForm({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const selectedBarberRecord = barbers.find(
-    (barber) => barber.name === formData.barber
+    (barber) => barber.name === formData.barber,
   );
   const selectedSpecialistAvailable =
-    selectedBarberRecord?.available ?? (selectedSpecialist?.available !== false);
+    selectedBarberRecord?.available ?? selectedSpecialist?.available !== false;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const chosenBarber = barbers.find((barber) => barber.name === formData.barber);
+      const chosenBarber = barbers.find(
+        (barber) => barber.name === formData.barber,
+      );
 
       if (chosenBarber && !chosenBarber.available) {
         setFeedback({
           type: "error",
-          message: "This barber is currently unavailable. Please select another available barber.",
+          message:
+            "This barber is currently unavailable. Please select another available barber.",
         });
         return;
       }
@@ -59,7 +94,8 @@ function AppointmentForm({
       if (selectedSpecialist && !selectedSpecialistAvailable) {
         setFeedback({
           type: "error",
-          message: "This barber is currently unavailable. Please select another available barber.",
+          message:
+            "This barber is currently unavailable. Please select another available barber.",
         });
         return;
       }
@@ -116,13 +152,13 @@ function AppointmentForm({
         // doctor: selectedSpecialist?.name || "",
         // doctorId: selectedSpecialist?.id || "",
       });
-
     } catch (error) {
       console.log(error);
       if (error.message === "slot-already-booked") {
         setFeedback({
           type: "error",
-          message: "This time slot is already booked. Please select another time.",
+          message:
+            "This time slot is already booked. Please select another time.",
         });
       } else {
         setFeedback({ type: "error", message: "Error booking appointment" });
@@ -133,6 +169,56 @@ function AppointmentForm({
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
     onBack();
+  };
+
+  const customSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: "#151b21",
+      border: "1px solid rgba(212,175,55,.3)",
+      borderColor: state.isFocused ? "#d4af37" : "rgba(212,175,55,.3)",
+      minHeight: "48px",
+      borderRadius: "8px",
+      boxShadow: state.isFocused ? "0 0 10px rgba(212,175,55,.3)" : "none",
+      "&:hover": {
+        borderColor: "#d4af37",
+      },
+    }),
+
+    menu: (base) => ({
+      ...base,
+      backgroundColor: "#151b21",
+    }),
+
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? "#d4af37"
+        : state.isFocused
+          ? "#222b33"
+          : "#151b21",
+      color: state.isSelected ? "#121212" : "#fff",
+      cursor: "pointer",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: "#fff",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#999",
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      color: "#d4af37",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
   };
 
   return (
@@ -147,27 +233,20 @@ function AppointmentForm({
           <div className="selected-barber-status">
             <strong>{selectedSpecialist.name}</strong>
             <span
-              className={selectedSpecialistAvailable ? "is-available" : "is-unavailable"}
+              className={
+                selectedSpecialistAvailable ? "is-available" : "is-unavailable"
+              }
             >
               {selectedSpecialistAvailable ? "Available" : "Unavailable"}
             </span>
           </div>
         )}
-{/* 
-        <div className="doctor-selection">
-          <span className="doctor-avatar">{selectedDoctor?.avatar}</span>
-
-          <div>
-            <p className="doctor-name">{selectedDoctor?.name}</p>
-            <p className="doctor-specialty">
-              {selectedDoctor?.specialty}
-            </p>
-          </div>
-        </div> */}
       </div>
 
       {feedback.message && (
-        <div className={`appointment-feedback ${feedback.type}`}>{feedback.message}</div>
+        <div className={`appointment-feedback ${feedback.type}`}>
+          {feedback.message}
+        </div>
       )}
 
       <form className="form" onSubmit={handleSubmit}>
@@ -177,9 +256,7 @@ function AppointmentForm({
           placeholder="Your Name"
           required
           value={formData.name}
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
 
         {/* Email */}
@@ -188,9 +265,7 @@ function AppointmentForm({
           placeholder="Your Email"
           required
           value={formData.email}
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
 
         {/* Phone */}
@@ -199,96 +274,78 @@ function AppointmentForm({
           placeholder="Phone Number"
           required
           value={formData.phone}
-          onChange={(e) =>
-            setFormData({ ...formData, phone: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
 
         {/* Barber */}
         {/* Barber */}
-        <select
-          required
-          value={formData.barber}
-          onChange={(e) => {
-            const barber = barbers.find((item) => item.name === e.target.value);
-
+        <Select
+          options={barberSelectOptions}
+          styles={customSelectStyles}
+          placeholder="Select Barber"
+          value={
+            barberSelectOptions.find(
+              (option) => option.value === formData.barber,
+            ) || null
+          }
+          onChange={(selected) => {
             setFormData({
               ...formData,
-              barber: e.target.value,
-              doctor: e.target.value,
-              doctorId: barber?.id || "",
+              barber: selected.value,
+              doctor: selected.value,
+              doctorId: selected.id,
             });
           }}
-        >
-          <option value="">Select Barber</option>
-          {barberOptions.map((barber) => (
-            <option
-              key={barber.id || barber.name}
-              value={barber.name}
-              disabled={barber.available === false}
-            >
-              {barber.name}
-              {barber.available === false ? " - Unavailable" : ""}
-            </option>
-          ))}
-        </select>
+        />
 
-        {/* Service */}
-        <select
-          required
-          value={formData.service}
-          onChange={(e) =>
-            setFormData({ ...formData, service: e.target.value })
+        <Select
+          options={serviceOptions}
+          styles={customSelectStyles}
+          placeholder="Select Service"
+          value={
+            serviceOptions.find(
+              (option) => option.value === formData.service,
+            ) || null
           }
-        >
-          <option value="">Select Service</option>
-          <option value="Haircut">✂️ Haircut</option>
-          <option value="Beard Trim">🧔 Beard Trim</option>
-          <option value="Hair Color">🎨 Hair Color</option>
-          <option value="Facial">💆 Facial</option>
-        </select>
+          onChange={(selected) =>
+            setFormData({
+              ...formData,
+              service: selected.value,
+            })
+          }
+        />
 
         {/* Date */}
         <input
           type="date"
           required
           value={formData.date}
-          onChange={(e) =>
-            setFormData({ ...formData, date: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
           onFocus={(e) => e.target.showPicker?.()}
           onClick={(e) => e.target.showPicker?.()}
         />
 
-        {/* Time */}
-        <select
-          required
-          value={formData.time}
-          onChange={(e) =>
-            setFormData({ ...formData, time: e.target.value })
+        <Select
+          options={timeOptions}
+          styles={customSelectStyles}
+          placeholder="Select Time Slot"
+          value={
+            timeOptions.find((option) => option.value === formData.time) || null
           }
-        >
-          <option value="">Select Time Slot</option>
-          <option value="09:00 AM">09:00 AM</option>
-          <option value="10:00 AM">10:00 AM</option>
-          <option value="11:00 AM">11:00 AM</option>
-          <option value="12:00 PM">12:00 PM</option>
-          <option value="01:00 PM">01:00 PM</option>
-          <option value="02:00 PM">02:00 PM</option>
-          <option value="03:00 PM">03:00 PM</option>
-          <option value="04:00 PM">04:00 PM</option>
-          <option value="05:00 PM">05:00 PM</option>
-          <option value="06:00 PM">06:00 PM</option>
-        </select>
+          onChange={(selected) =>
+            setFormData({
+              ...formData,
+              time: selected.value,
+            })
+          }
+        />
 
         {/* Notes */}
         <textarea
           placeholder="Special Instructions (Optional)"
           rows="4"
           value={formData.notes}
-          onChange={(e) =>
-            setFormData({ ...formData, notes: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
         />
 
         <button
@@ -309,7 +366,11 @@ function AppointmentForm({
             <div className="success-modal-icon">✓</div>
             <h3>Appointment Booked</h3>
             <p>Your appointment request has been confirmed successfully.</p>
-            <button type="button" className="success-modal-btn" onClick={handleSuccessModalClose}>
+            <button
+              type="button"
+              className="success-modal-btn"
+              onClick={handleSuccessModalClose}
+            >
               Done
             </button>
           </div>

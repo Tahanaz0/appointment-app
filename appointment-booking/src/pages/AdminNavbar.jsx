@@ -3,6 +3,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { auth } from "../firebase";
 import "./AdminNavbar.css";
 
+import {
+  FaTachometerAlt,
+  FaCheckCircle,
+  FaComments,
+  FaUserCircle,
+  FaSignOutAlt,
+  FaCut,
+} from "react-icons/fa";
+
 function AdminNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,14 +23,28 @@ function AdminNavbar() {
 
   return (
     <header className="admin-header">
+      {/* Left */}
       <div className="header-left">
-        <span className="admin-eyebrow">Admin Panel</span>
-        <h1>GentleCuts Dashboard</h1>
-        <p className="header-time">
-          Manage bookings, barbers, gallery and chat
-        </p>
+        <div className="header-brand">
+          <div className="logo-box">
+            <FaCut />
+          </div>
+
+          <div>
+            <span className="admin-eyebrow">Admin Panel</span>
+
+            <h1>
+              Gentle<span>Cuts</span> 
+            </h1>
+
+            <p className="header-time">
+              Manage bookings, barbers, gallery and chat
+            </p>
+          </div>
+        </div>
       </div>
 
+      {/* Center */}
       <div className="admin-bottom-nav">
         <button
           className={`admin-nav-btn ${
@@ -29,7 +52,8 @@ function AdminNavbar() {
           }`}
           onClick={() => navigate("/admin/dashboard")}
         >
-          Dashboard
+          <FaTachometerAlt />
+          <span>Dashboard</span>
         </button>
 
         <button
@@ -40,7 +64,8 @@ function AdminNavbar() {
           }`}
           onClick={() => navigate("/admin/completed-bookings")}
         >
-          Completed
+          <FaCheckCircle />
+          <span>Bookings</span>
         </button>
 
         <button
@@ -49,7 +74,8 @@ function AdminNavbar() {
           }`}
           onClick={() => navigate("/admin/chat")}
         >
-          Chat
+          <FaComments />
+          <span>Chat</span>
         </button>
 
         <button
@@ -58,12 +84,15 @@ function AdminNavbar() {
           }`}
           onClick={() => navigate("/admin/profile")}
         >
-          Profile
+          <FaUserCircle />
+          <span>Profile</span>
         </button>
       </div>
 
+      {/* Right */}
       <button className="logout-btn" onClick={handleLogout}>
-        Logout
+        <FaSignOutAlt />
+        <span>Logout</span>
       </button>
     </header>
   );
